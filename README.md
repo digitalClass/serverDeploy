@@ -1,5 +1,5 @@
 # Server Deploy
-This is sever deploy for the project of digital classroom which stared by 2016 summer school of the USTC of software engeering.
+This is sever deploy for the project of digital classroom which started by 2016 summer school of the USTC of software engeering.
 
 ## Introduction
 ### About digital classroom
@@ -11,4 +11,4 @@ Our group(see below)'s duty is providing the server technology support for this 
 ## Team
 1. Yunfeng Wang[:octocat:](https://github.com/vra)
 2. Zhihua Huang[:octocat:](https://github.com/hzh8311)
-3. Yunchong Wang[:octocat:](https://github.com/)
+3. Yunchong Zhang[:octocat:](https://github.com/Cobbyzhang)
