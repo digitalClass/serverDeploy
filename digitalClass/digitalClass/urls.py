@@ -15,7 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from digitalClass.views import *
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url('^hello/$',hello),
+    url('^time/$',current_datetime),
+    url('^time/plus/(\d{1,2})/$',days_ahead),
 ]
