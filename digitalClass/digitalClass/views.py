@@ -6,14 +6,14 @@ from django.http import HttpResponse
 import MySQLdb
 import datetime
 
-def hello(request):
+def homepage(request):
     """print hello world on website
 
     :request: HttpRequest
     :returns: HttpResponse
 
     """
-    return HttpResponse("hello world")
+    return render_to_response("index.html")
 
 def current_datetime(request):
     now = datetime.datetime.now()
@@ -34,16 +34,3 @@ def days_ahead(request, offset):
     future_datetime = datetime.datetime.now() + datetime.timedelta(days=days_offset)
     return render_to_response('future_time.html',locals())
 
-def book_list(request):
-    """TODO: Docstring for book_list.
-
-    :request: TODO
-    :returns: TODO
-
-    """
-    db = MySQLdb.connect(user='root',db='users',passwd='1234',host='localhost')
-    cursor = db.cursor()
-    cursor.execute('SELECT name FROM books ORDER BY name')
-    names = [row[0] for row in cursor.fetchall()]
-    db.close()
-    return render_to_response('book_list.html',{'names':names})
