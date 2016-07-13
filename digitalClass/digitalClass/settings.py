@@ -134,7 +134,7 @@ STATIC_ROOT = os.path.join(SITE_ROOT,'web_page/static')
 STATICFILES_DIRS = (
     ("css", os.path.join(STATIC_ROOT,'css')),
     ("fonts", os.path.join(STATIC_ROOT,'fonts')),
-  	("images", os.path.join(STATIC_ROOT,'images')),
+    ("images", os.path.join(STATIC_ROOT,'images')),
     ("js", os.path.join(STATIC_ROOT,'js')),
 )
 
@@ -146,9 +146,15 @@ USERS_PASSWORD_MIN_LENGTH = 6
 USERS_PASSWORD_MAX_LENGTH = None
 USERS_CHECK_PASSWORD_COMPLEXITY=True
 USERS_SPAM_PROTECTION = False
+USERS_EMAIL_DOMAINS_WHITELIST=['mail.ustc.edu.cn','ustc.edu.cn','test.com','163.com']
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_USE_TLS=False
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS=False
+EMAIL_HOST='mail.ustc.edu.cn'
+EMIAL_PORT=25
+EMAIL_HOST_USER='hzh8311@mail.ustc.edu.cn'
+EMAIL_HOST_PASSWORD='h8062803~~'
+DEFAULT_FROM_EMAIL = 'hzh8311@mail.ustc.edu.cn'
 
 #sending e-mails account
 USERS_CREATE_SUPERUSER = DEBUG

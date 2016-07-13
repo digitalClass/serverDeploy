@@ -21,5 +21,7 @@ from digitalClass.views import *
 urlpatterns = [
     url(r'^$', homepage),
     url(r'^admin/', admin.site.urls),
+# app users
     url(r'^accounts/', include('users.urls')),
+    url(r'^accounts/profile/$', loginedHomepage),
 ]

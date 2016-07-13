@@ -15,7 +15,6 @@ def homepage(request):
     """
     return render_to_response("index.html")
 
-def current_datetime(request):
-    now = datetime.datetime.now()
-    return render_to_response('current_datetime.html',{'current_datetime': now})
+def loginedHomepage(request):
+    return render_to_response('users/profile.html')
 
