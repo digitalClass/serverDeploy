@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
 
 from django.db import models
-
+from courses import models as courses_model
+from users import models as users_model
 # Create your models here.
 class Question(models.Model):
 
 	""" Definition of question posted in course notes"""
-	id = models.IntegerField(primary_key=True)
 	date = models.DateField()
-	user_id = models.IntegerField()
-	course_id = models.IntegerField()
+	user = models.ForeignKey(users_model.User)
+	course = models.ForeignKey(courses_model.Course)
 	content = models.CharField(max_length=1024)
 	num_vote = models.IntegerField()
 
@@ -20,10 +20,9 @@ class Question(models.Model):
 class Answer(models.Model):
 
 	""" Definition of answer posted in course notes"""
-	id = models.IntegerField(primary_key=True)
 	date = models.DateField()
-	user_id = models.IntegerField()
-	course_id = models.IntegerField()
+	user = models.ForeignKey(users_model.User)
+	course = models.ForeignKey(courses_model.Course)
 	user_type = models.IntegerField()
 	content = models.CharField(max_length=1024)
 	num_vote = models.IntegerField()
@@ -35,10 +34,9 @@ class Answer(models.Model):
 class Question_Comment(models.Model):
 
 	""" Definition of comment on question posted in course notes"""
-	id = models.IntegerField(primary_key=True)
 	date = models.DateField()
-	question_id = models.IntegerField()
-	user_id = models.IntegerField()
+	question = models.IntegerField()
+	user = models.ForeignKey(users_model.User)
 	content = models.CharField(max_length=1024)
 
 	def __unicode__(self):
@@ -48,10 +46,9 @@ class Question_Comment(models.Model):
 class Answer_Comment(models.Model):
 
 	""" Definition of comment on question posted in course notes"""
-	id = models.IntegerField(primary_key=True)
 	date = models.DateField()
-	answer_id = models.IntegerField()
-	user_id = models.IntegerField()
+	answer = models.IntegerField()
+	user = models.ForeignKey(users_model.User)
 	content = models.CharField(max_length=1024)
 
 	def __unicode__(self):
