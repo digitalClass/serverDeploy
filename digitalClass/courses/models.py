@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+import users.models as users_models
 
 class Course(models.Model):
 	#采用内置自增id
@@ -14,8 +15,7 @@ class Course(models.Model):
 	#课程名称
 	title = models.CharFiedl(max_length=32)
 	course_id = models.CharField(max_length=16)
-	teacher = models.ForeignKey(User)
-	ta = models.ForeigbKey(User)
+	user_type = models.ForeignKey(users_models.User)
 
 class PPTfile(models.Model):
 	#采用内置自增id
@@ -35,8 +35,8 @@ class PPTslice(models.Model):
 	date = models.DateField()
 	#the path of this slice of PPT
 	img_path = models.CharField(max_length=256)
-	pptfile = models.ForeignKey(PPTfile) 
-	
+	pptfile = models.ForeignKey(PPTfile)
+
 class Video(models.Model):
 	#采用内置自增id
 	#id = models.IntegerField(primary_key=true)
