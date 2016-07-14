@@ -8,10 +8,14 @@ from django.utils.translation import ugettext_lazy as _
 from .conf import settings
 from .managers import UserInheritanceManager, UserManager
 
+# import courses.models as courses_models
+# import comments.models as comments_models
+
 
 class AbstractUser(AbstractBaseUser, PermissionsMixin):
     USERS_AUTO_ACTIVATE = not settings.USERS_VERIFY_EMAIL
 
+    name = models.CharField(max_length=30,unique=True,db_index=True)
     email = models.EmailField(
         _('email address'), max_length=255, unique=True, db_index=True)
     is_staff = models.BooleanField(
