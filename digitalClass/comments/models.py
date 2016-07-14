@@ -1,15 +1,16 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from courses import models as courses_model
-from users import models as users_model
+from courses import models as courses_models
+from users import models as users_models
 # Create your models here.
 class Question(models.Model):
 
 	""" Definition of question posted in course notes"""
 	date = models.DateField()
-	user = models.ForeignKey(users_model.User)
-	course = models.ForeignKey(courses_model.Course)
+	user = models.ForeignKey(users_models.User, null=True)
+	course = models.ForeignKey(courses_models.Course, null=True)
+	ppt_slice = models.ForeignKey(courses_models.PPTslice, null=True)
 	content = models.CharField(max_length=1024)
 	num_vote = models.IntegerField()
 
@@ -21,8 +22,9 @@ class Answer(models.Model):
 
 	""" Definition of answer posted in course notes"""
 	date = models.DateField()
-	user = models.ForeignKey(users_model.User)
-	course = models.ForeignKey(courses_model.Course)
+	user = models.ForeignKey(users_models.User, null=True)
+	course = models.ForeignKey(courses_models.Course, null=True)
+	questin = models.ForeignKey(Question, null=True)
 	user_type = models.IntegerField()
 	content = models.CharField(max_length=1024)
 	num_vote = models.IntegerField()
@@ -35,8 +37,8 @@ class Question_Comment(models.Model):
 
 	""" Definition of comment on question posted in course notes"""
 	date = models.DateField()
-	question = models.IntegerField()
-	user = models.ForeignKey(users_model.User)
+	question = models.ForeignKey(Question, null=True)
+	user = models.ForeignKey(users_models.User, null=True)
 	content = models.CharField(max_length=1024)
 
 	def __unicode__(self):
@@ -47,8 +49,8 @@ class Answer_Comment(models.Model):
 
 	""" Definition of comment on question posted in course notes"""
 	date = models.DateField()
-	answer = models.IntegerField()
-	user = models.ForeignKey(users_model.User)
+	answer = models.ForeignKey(Answer, null=True)
+	user = models.ForeignKey(users_models.User, null=True)
 	content = models.CharField(max_length=1024)
 
 	def __unicode__(self):
