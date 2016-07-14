@@ -17,7 +17,5 @@ def homepage(request):
 
 def loginedHomepage(request):
     if request.user.is_authenticated:
-        user_email = request.user.email
-        user_last_login = request.user.last_login
-        c = Context({"user_emil":user_email,"user_last_login":user_last_login})
-    return render_to_response('users/profile.html',c)
+        user_name = request.user.username
+    return render_to_response('users/profile.html',{"user_name":user_name,})
