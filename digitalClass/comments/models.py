@@ -24,7 +24,7 @@ class Answer(models.Model):
 	date = models.DateField()
 	user = models.ForeignKey(peoples_models.User,null=True)
 	course = models.ForeignKey(courses_models.Course,null=True)
-	questin = models.ForeignKey(Question, null=True)
+	question = models.ForeignKey(Question, null=True)
 	user_type = models.IntegerField()
 	content = models.CharField(max_length=1024)
 	num_vote = models.IntegerField()
