@@ -17,7 +17,7 @@ def homepage(request):
 
 def loginedHomepage(request):
     user_name = "default"
-    if request.user.is_authenticated()
+    if request.user.is_authenticated():
         user_name = request.user.name
         return render_to_response('users/profile.html',{"user_name":user_name})
 
