@@ -27,12 +27,18 @@ def profile(request):
 
 @login_required
 def create_course(request):
-    #errors = []
+    errors = []#错误列表
+    #检测用户是否登陆
     if request.user.is_authenticated():
+	#检测用于类型是否为老师‘te’
 	if request.user.user_role == 'te':
+	    #检测方法是否为POST
 	    if request.method == 'POST':
+		#调用courses.form.py的CreateCourseForm类
 		form = CreateCourseForm(request.POST)
+		#检测表单创建有效性
 		if form.is_valid():
+		    #时间信息
 		    now = datetime.datetime.now()
 		    #这里需要一个默认的图片地址，在未上传ppt时显示
 		    img = ''
@@ -46,6 +52,9 @@ def create_course(request):
 		    #表单无效，设置初始值重新回到本页面，提示错误信息
 	    else:
 		form = CreateCourseForm('subject': 'SUBJECT', 'course_id':'COUSRSE ID')
+		
+	else:
+	    errors.append('You have no priority to create a course.')
     return HttpResponseRedirect('')
 
 @login_required
