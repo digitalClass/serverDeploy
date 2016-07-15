@@ -12,7 +12,7 @@ def homepage(request):
     if not request.user.is_authenticated():
         return render_to_response("index.html")
     else:
-        html = "<html><h1>need to be doen<h1><a href='accouns/logout'>注销</a></html>"
+        html = "<html><h1>need to be doen<h1><a href='accounts/logout'>注销</a></html>"
         return HttpResponse(html)
 
 @login_required
@@ -31,8 +31,9 @@ def classroom(request):
 def create(request):
     return render_to_response('create.html')
 
-# //for logout quiet
-# @login_required
-# def logout_user(request):
-#     logout(request)
-#     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+# for logout quiet;
+# but it seems doesn't work'
+@login_required
+def logout_user(request):
+    logout(request)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
