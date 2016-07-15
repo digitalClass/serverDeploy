@@ -18,8 +18,10 @@ def homepage(request):
 @login_required
 def profile(request):
     if request.user.is_authenticated():
+        user_email = request.user.email
         user_name = request.user.username
         user_id = request.user.id
+        # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
     return render_to_response('users/profile.html',{"user_name":user_name,})
 
