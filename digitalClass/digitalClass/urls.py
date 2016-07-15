@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'^$', homepage),
     url(r'^admin/', admin.site.urls),
 # app users
-    url(r'^accounts/logout$',logout),
+    url(r'^accounts/logout$',logout_user),
     url(r'^accounts/', include('users.urls')),
     url(r'^accounts/profile/$', profile),
     url(r'^create/$', create, name="create_course"),

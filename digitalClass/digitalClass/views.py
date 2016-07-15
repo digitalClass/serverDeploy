@@ -12,7 +12,7 @@ def homepage(request):
     if not request.user.is_authenticated():
         return render_to_response("index.html")
     else:
-        html = "<html><h1>need to be doen<h1><a href='accounts/logout'>注销</a></html>"
+        html = "<html><h1>need to be doen<h1><a href='/accounts/logout/'>注销</a></html>"
         return HttpResponse(html)
 
 @login_required
