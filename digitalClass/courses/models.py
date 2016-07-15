@@ -16,6 +16,8 @@ class Course(models.Model):
 	title = models.CharField(max_length=32,null=True)
 	course_id = models.CharField(max_length=16)
 	user_type = models.ForeignKey(users_models.User)
+	def __unicode__(self):
+		return self.title
 
 class PPTfile(models.Model):
 	#采用内置自增id

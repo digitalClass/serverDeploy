@@ -28,3 +28,8 @@ urlpatterns = [
     url(r'^create/$', create, name="create_course"),
     url(r'^classroom/(\d+)/(\d+)/$',classroom),
 ]
+
+urlpatterns += [
+    url(r'^test.display_meta/$', diplay_meta),
+    url(r'^test.display_cookie/$', display_cookie),
+]
