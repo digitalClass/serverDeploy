@@ -22,7 +22,7 @@ class UserCreationForm(forms.ModelForm):
     gender = models.CharField(max_length=1)
     email = UsersEmailField(label=_('电子邮件'), max_length=255)
     USER_ROLE=(('st','学生'),('te','老师'),('ta','助教'),)
-    user_role = forms.ChoiceField(label='类型',choices=USER_ROLE,initial='学生')
+    user_role = models.CharField(max_length=2)
     password1 = PasswordField(label=_('密码'))
     password2 = PasswordField(
         label=_('重复密码'),

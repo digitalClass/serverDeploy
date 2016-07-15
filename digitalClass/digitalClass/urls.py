@@ -15,13 +15,16 @@ Including another URLconf
 """
 from django.conf.urls import url,include
 from django.contrib import admin
-from django.contrib.auth import urls as auth_urls
+from django.contrib.auth import urls
 from digitalClass.views import *
 
 urlpatterns = [
     url(r'^$', homepage),
     url(r'^admin/', admin.site.urls),
 # app users
+    url(r'^accounts/logout$',logout),
     url(r'^accounts/', include('users.urls')),
-    url(r'^accounts/profile/$', loginedHomepage),
+    url(r'^accounts/profile/$', profile),
+    url(r'^create/$', create, name="create_course"),
+    url(r'^classroom/$',classroom),
 ]

@@ -15,29 +15,26 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
     USERS_AUTO_ACTIVATE = not settings.USERS_VERIFY_EMAIL
 
     email = models.EmailField(
-        _('email address'), max_length=255, unique=True, db_index=True)
+            _('email address'), max_length=255, unique=True, db_index=True)
     is_staff = models.BooleanField(
-        _('staff status'), default=False,
-        help_text=_('Designates whether the user can log into this admin site.'))
+            _('staff status'), default=False,
+            help_text=_('Designates whether the user can log into this admin site.'))
 
     is_active = models.BooleanField(
-        _('active'), default=USERS_AUTO_ACTIVATE,
-        help_text=_('Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.'))
+            _('active'), default=USERS_AUTO_ACTIVATE,
+            help_text=_('Designates whether this user should be treated as '
+                'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     username = models.CharField(_('用户名'),max_length=30, unique=True, null=True)
     student_id = models.CharField('学号或工号',max_length=30, unique=True, null=True)
 
     MALE = 'm'
     FEMALE = 'f'
-    GENDER = (
-        (MALE, '男'),
-        (FEMALE,'女'),
-        )
+    GENDER = ((MALE, '男'),(FEMALE,'女'),)
     gender = models.CharField('性别',
-        max_length=1,
-        choices=GENDER,
-        default=MALE)
+            max_length=1,
+            choices=GENDER,
+            default=MALE)
 
     user_type=models.ForeignKey(ContentType,null=True,editable=False)
 
@@ -46,10 +43,10 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
     STUDENT='st'
     USER_ROLE=((TEACHER,'老师'),(TA,'助教'),(STUDENT,'学生'),)
     user_role=models.CharField(
-        max_length=2,
-        choices=USER_ROLE,
-        default=STUDENT)
-    user_role = models.CharField(max_length=2, null=True, editable=False)
+            '类型',
+            max_length=2,
+            choices=USER_ROLE,
+            default=STUDENT)
 
     objects = UserInheritanceManager()
     base_objects = UserManager()
