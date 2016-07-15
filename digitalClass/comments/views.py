@@ -1,11 +1,12 @@
 from django.shortcuts import render
 
 from comments.models import Question, Answer, Question_Comment, Answer_Comment
-from courses.models import PPTslice
+from courses.models import Course, PPTslice 
 # Create your views here.
 def get_question(course_id, ppt_id):
-	curr_slice = PPTslice.objects.get(index=ppt_id)	
-	questions = Question.objects.filter(course=course_id, ppt_slice=curr_slice)
+	curr_course = Course.objects.get(id=course_id)	
+	curr_slice = PPTslice.objects.get(id=ppt_id)	
+	questions = Question.objects.filter(course=curr_course, ppt_slice=curr_slice)
 
 	#return whole Question models because we need to use them to get
 	#Answers and other elements.

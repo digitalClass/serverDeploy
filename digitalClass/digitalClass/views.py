@@ -1,11 +1,15 @@
 #!coding:utf8
 from django.http import HttpResponseRedirect,HttpResponse
-from django.template import Template,Context,loader
+from django.template import Template,Context,loader, RequestContext
 from django.template.loader import get_template
 from django.shortcuts import render_to_response
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 import datetime
+
+from comments import models as comments_models
+from comments import views as comments_views
+from users.models import User
 
 now = datetime.datetime.now()
 def homepage(request):
@@ -25,8 +29,56 @@ def profile(request):
         user_role = request.user.user_role
     return render_to_response('users/profile.html',{"user_name":user_name,})
 
-def classroom(request):
-    return render_to_response('player.html')
+def classroom(request, course_id, ppt_id):
+	questions = comments_views.get_question(course_id, ppt_id)
+	question_data = []	
+	for q in questions:
+		q_data = {}
+
+		#get basic info about the certain question
+		q_data['username'] = q.user.username
+		q_data['date'] = q.date
+		q_data['content'] = q.content
+		q_data['num_vote'] = q.num_vote
+
+		#add comments on this question
+		question_comments = comments_views.get_question_comment(q)
+		question_comments_data = []
+		for qc in question_comments:
+				qc_data = {}
+				qc_data['username'] = qc.uers.name
+				qc_data['date'] = qc.date
+				qc_data['content'] = qc.content
+
+		#get answers of this question
+		answers = comments_views.get_answer(q)
+		answers_data = []
+		for a in answers:
+			a_data = {}
+			a_data['username'] = a.uers.name
+			a_data['date'] = a.date
+			a_data['content'] = a.content
+			a_data['num_vote'] = a.num_vote
+
+			#add comments of this answer
+			answer_comments = comments_views.get_answer_comment(a)
+			answer_comments_data = []
+			for ac in answer_comments:
+				ac_data = {}
+				ac_data['username'] = ac.user.name
+				ac_data['date'] = ac.date
+				ac_data['content'] = ac.content
+				answer_comments_data.append(ac_data)
+
+			a_data['comments'] = answer_comments_data
+			answers_data.append(a_data)
+
+
+		question_data['answers'] = answers_data	
+		question_data.append(q_data)
+			
+	print(question_data)
+	return render_to_response('player.html', {'question_data':question_data}, context_instance=RequestContext(request))
 
 def create(request):
     return render_to_response('create.html')
