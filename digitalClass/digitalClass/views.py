@@ -32,9 +32,9 @@ def profile(request):
         user_role = request.user.user_role
     return render_to_response('users/profile.html',{"user_name":user_name,})
 
-def classroom(request, course_id, ppt_id):
+def classroom(request, course_id, ppt_id, slice_id):
 	ppt_file = courses_models.PPTfile.objects.get(course=course_id, id=ppt_id)
-	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file)
+	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=ppt_id)
 
 	ppt_slices_data = []
 	for slice in ppt_slices:
@@ -52,7 +52,7 @@ def classroom(request, course_id, ppt_id):
 	course_data['date'] = course.date
 
 
-	questions = comments_views.get_question(course_id, ppt_id)
+	questions = comments_views.get_question(course_id, ppt_id, slice_id)
 	question_data = []	
 	for q in questions:
 		q_data = {}

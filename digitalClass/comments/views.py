@@ -1,13 +1,15 @@
 from django.shortcuts import render
 
 from comments.models import Question, Answer, Question_Comment, Answer_Comment
-from courses.models import Course, PPTslice 
+from courses.models import Course, PPTfile, PPTslice
 # Create your views here.
-def get_question(course_id, ppt_id):
+def get_question(course_id, ppt_id, slice_id):
 	curr_course = Course.objects.get(id=course_id)	
-	curr_slice = PPTslice.objects.get(id=ppt_id)	
-	questions = Question.objects.filter(course=curr_course, ppt_slice=curr_slice)
+	curr_ppt_file = PPTfile.objects.get(id=ppt_id)	
 
+	curr_slice = PPTslice.objects.get(pptfile=curr_ppt_file,index=ppt_id)	
+	questions = Question.objects.filter(course=curr_course, ppt_slice=curr_slice)
+	
 	#return whole Question models because we need to use them to get
 	#Answers and other elements.
 	return questions
@@ -26,9 +28,3 @@ def get_question_comment(q):
 def get_answer_comment(a):
 	answer_comments = Answer_Comment.objects.filter(answer=a)	
 	return answer_comments
-
-
-
-	
-
-	
