@@ -26,5 +26,6 @@ urlpatterns = [
     url(r'^accounts/', include('users.urls')),
     url(r'^accounts/profile/$', profile),
     url(r'^create/$', create, name="create_course"),
-    url(r'^classroom/(\d+)/(\d+)/(\d+)/$',classroom),
+    url(r'^addcomments/$', add_comments),
+    url(r'^classroom/(\d+)/(\w+)/(\d+)/$',classroom),
 ]
