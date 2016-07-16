@@ -3,8 +3,5 @@
 db.sqlite3
 books
 web_page
-migrations
 build
-
-!/digitalClass/users/migrations/
 
