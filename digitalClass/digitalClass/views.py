@@ -98,14 +98,15 @@ def classroom(request, course_id, ppt_id, slice_id):
 			answers_data.append(a_data)
 
 
-		q_data['answers'] = answers_data	
+		q_data['answers'] = answers_data
 		question_data.append(q_data)
-			
+
 	print('question_data')
 	print(question_data)
-	
+
 	return render_to_response('player.html', {'ppt_slices_data': ppt_slices_data,'course_data':course_data,'question_data':question_data}, context_instance=RequestContext(request))
 
+# why this does not work?
 def create(request):
     return render_to_response('create.html')
 
