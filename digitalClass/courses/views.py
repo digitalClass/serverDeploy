@@ -1,14 +1,25 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect,Http404
 from courses.models import Course, PPTfile, PPTslice
 from users.models import User
-from forms import *
+from form import *
 
 import datetime
 # Create your views here.
 
 @login_required
 def profile(request):
+    #profile, login required
+    #authenticated -> get basic information from request.user
+    #three part,request.user.user_role,only teacher's part now
+    #if user is a teacher
+	#get User object due to id
+	#related_name='teacher'Course and User has a ManyToMany table
+	#return course list
+    #a teaching assistant
+    #a student
+    #not authenticated->redirect to somewhere
     if request.user.is_authenticated():
         user_email = request.user.email
         user_name = request.user.username
@@ -17,56 +28,110 @@ def profile(request):
         user_role = request.user.user_role
 	if user_role == 'te':
 	    teacher = User.objects.get(id=user.id)
-	    courses_list = teacher.courses_set.all()
+	    courses_list = teacher.teacher.all()
 	    return render_to_response('users/profile.html',{"user_name":user_name, "course_list":course_list})
 	elif user_role == 'ta':
-	    #Teaching Assistant's profile
-	else :
+	    return HttpResponseRedirect('')
+	 #Teaching Assistant's profile
+	else:
 	    #Student's profile
+	    return HttpResponseRedirect('')
     return HttpResponseRedirect('')
 
 @login_required
 def create_course(request):
-    errors = []#错误列表
-    #检测用户是否登陆
+    #authenticated
+    #is a teacher?
+    #method = POST?
+    #CreateCourseForm
+    #is it valid?
+    #a default image path is needed
+    #has priority
+	#timing
+	#introduce
+	#img_path
+	#user_id
+	#Course.save()
+	#add Course.teacher
+    #else -> redirect
+    errors = []
     if request.user.is_authenticated():
-	#检测用于类型是否为老师‘te’
 	if request.user.user_role == 'te':
-	    #检测方法是否为POST
 	    if request.method == 'POST':
-		#调用courses.form.py的CreateCourseForm类
 		form = CreateCourseForm(request.POST)
-		#检测表单创建有效性
 		if form.is_valid():
-		    #时间信息
+		    f = form.cleaned_data
 		    now = datetime.datetime.now()
-		    #这里需要一个默认的图片地址，在未上传ppt时显示
 		    img = ''
-		    #不知道user_type 是什么
 		    user_id = request.user.id
-		    c = Course(date=form.course_date, create_time=now, img_path=img, title=form.course_title, course_id = form.course_id, user_type=user_id)
+		    c = Course(introduce=f['course_date'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
 		    c.save()
-		    #暂时跳转的是个人主页，等课程写好了再改成课程主页
+		    u = User.objects.get(id=user_id)
+		    c.teacher.add(u)
 		    return HttePresponseRedirect('/accounts/profile')
 		else:
-		    #表单无效，设置初始值重新回到本页面，提示错误信息
+		    for k,v in f.errors:
+			errors.append(v)
 	    else:
-		form = CreateCourseForm('subject': 'SUBJECT', 'course_id':'COUSRSE ID')
-		
+		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
 	else:
 	    errors.append('You have no priority to create a course.')
-    return HttpResponseRedirect('')
+    return render_to_reponse('create_course',{'form':form, 'errors':errors})
 
-@login_required
+
 def course_page(request, c_id):
-    #已有课程的课程页面
-    #调用课程信息、课程PPT列表，有一个上传PPT的link跳转到上传页面
+    #course page
+    #courses' information,ppt list are needed
+    #Is_this_course_teacher 
+    try:
+	course_id = int(c_id)
+    except ValueError:
+	raise Http404()
+    c = Course.objects.get(id=course_id)
+    Is_this_course_teacher = False
+    if is_authenticated():
+	user_id = request.user.id
+	u = c.teacher.filter(id=user_id)
+	if u != []:
+	    Is_this_course_teacher=True
+    return render_to_response('course_page.html',{'course':c, 'Is_this_course_teacher':Is_this_course_teacher})
+
+
 
 @login_required
 def ppt_upload(request,c_id):
-    #可能需要填写一个表单
-    #POST方法
-    #后台需要调用ppt切分工具
+    #hang in the air(a ppt cut tool is needed.)
+    #show uploaded files
+    #uploaded_list = []
+    #how to upload more than one file
+    #where to redirect when uploaded
+    if request.user.is_authenticated():
+	if request.user.user_role == 'te':
+	    if request.method == 'POST':
+		form = UploadPPTForm(request.POST,request.FILES)
+		if form.is_valid():
+		    handle_upload_file(request.FILES['file'])
+		    #return render_to_response()
+		    return HttpResponse("Successful")
+	    else:
+		form = UploadPPTForm()
+	    return render_to_response('ppt_upload.html',{'form':form})
+    return HttpResponseRedirect('')
+
+def handle_upload_file(f):
+    file_name=""
+    try:
+	path = "media/editor" + time.strftime('/%Y/%m/%d/%H/%M/%S/')
+	if not os.path.exist(path):
+	    os.makedirs(path)
+	    file_name = path + f.name
+	    destination = open(file_name,'wb+')
+	    for chunk in f.chunks():
+		destination.write(chunk)
+	    destination.close()
+    except Exception, e:
+	print e
+    return file_name
 
 
 
