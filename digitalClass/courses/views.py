@@ -64,8 +64,7 @@ def create_course(request):
 		    now = datetime.datetime.now()
 		    img = ''
 		    user_id = request.user.id
-		    c = Course(introduce=f['course_date'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
-		    c.save()
+		    c = Course.objects.create(introduce=f['course_date'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
 		    u = User.objects.get(id=user_id)
 		    c.teacher.add(u)
 		    return HttePresponseRedirect('/accounts/profile')
