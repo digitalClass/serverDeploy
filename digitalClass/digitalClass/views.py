@@ -27,13 +27,18 @@ def homepage(request):
         return render_to_response("index.html")
 
 @login_required
-def profile(request):
+def profile(request,
+        template_name="users/profile.html"):
     if request.user.is_authenticated():
         username = request.user.username
         user_id = request.user.id
+        useravatar = request.user.useravatar
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-    return render_to_response('users/profile.html',{"username":username,'user_id':user_id,'user_role':user_role})
+        c = Context({"username":username,"user_id":user_id,"user_role":user_role,"useravatar":useravatar,})
+        t = get_template(template_name)
+    else:username="游客"
+    return HttpResponse(t.render(c))
 
 def classroom(request, course_id, ppt_title, slice_id):
 	ppt_file = courses_models.PPTfile.objects.get(course=course_id, title=ppt_title)
