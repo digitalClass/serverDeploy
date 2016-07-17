@@ -6,9 +6,11 @@ from django.shortcuts import render_to_response
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 import datetime
+import json
 
 from comments import models as comments_models
 from comments import views as comments_views
+from users import models as users_models
 from courses import models as courses_models
 from courses import views as courses_views
 
@@ -16,44 +18,62 @@ from users.models import User
 
 now = datetime.datetime.now()
 def homepage(request):
-    if not request.user.is_authenticated():
-        return render_to_response("index.html")
-    else:
-        html = "<html><h1>need to be doen<h1><a href='/accounts/logout/'>注销</a></html>"
-        return HttpResponse(html)
-
-@login_required
-def profile(request):
     if request.user.is_authenticated():
-        user_email = request.user.email
-        user_name = request.user.username
+        username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-    return render_to_response('users/profile.html',{"user_name":user_name,})
+        return render_to_response("index.html",{'username':username,'user_id':user_id,'user_role':user_role,})
+    else:
+        return render_to_response("index.html")
 
-def classroom(request, course_id, ppt_id, slice_id):
-	ppt_file = courses_models.PPTfile.objects.get(course=course_id, id=ppt_id)
-	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=ppt_id)
+@login_required
+def profile(request,
+        template_name="users/profile.html"):
+    if request.user.is_authenticated():
+        username = request.user.username
+        user_id = request.user.id
+        useravatar = request.user.useravatar
+        # te:Teacher;ta:TeachAssisstant;st:Student
+        user_role = request.user.user_role
+        c = Context({"username":username,"user_id":user_id,"user_role":user_role,"useravatar":useravatar,})
+        t = get_template(template_name)
+    else:username="游客"
+    return HttpResponse(t.render(c))
 
-	ppt_slices_data = []
+def classroom(request, course_id, ppt_title, slice_id):
+	ppt_file = courses_models.PPTfile.objects.get(course=course_id, title=ppt_title)
+	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_id)
+	
+#	ppt_slices_data = []
 	for slice in ppt_slices:
 		ps_data = {}
 		ps_data['index'] = slice.index
-		ps_data['date'] = slice.date
+		ps_data['date'] = slice.upload_time
 		ps_data['img_path'] = slice.img_path
-		ppt_slices_data.append(ps_data)
+#		ppt_slices_data.append(ps_data)
+		# we only process 1 slice each time at now.
+		ppt_slices_data = ps_data
 
 	course_data = {}
 	course = courses_models.Course.objects.get(id=course_id)
 	course_data['course_id'] = course.course_id
 	course_data['title'] = course.title
-	course_data['teacher'] = course.user
-	course_data['date'] = course.date
+	teachers = course.teacher.all()
+	teacher_data = []
+	for i in range(len(teachers)):
+		teacher_data.append(teachers[i].username)
+	course_data['teacher'] = teacher_data
 
+	tas = course.teaching_assitant.all()
+	tas_data = []
+	for i in range(len(tas)):
+		tas_data.append(tas[i].username)
+	course_data['teaching_assistant'] = tas_data
+	course_data['date'] = course.create_time
 
-	questions = comments_views.get_question(course_id, ppt_id, slice_id)
-	question_data = []	
+	questions = comments_views.get_question(course_id, ppt_title, slice_id)
+	question_data = []
 	for q in questions:
 		q_data = {}
 
@@ -104,7 +124,48 @@ def classroom(request, course_id, ppt_id, slice_id):
 	print('question_data')
 	print(question_data)
 
+	print('ppt_slices_data')
+	print(ppt_slices_data)
+
+	print('course_data')
+	print(course_data)
 	return render_to_response('player.html', {'ppt_slices_data': ppt_slices_data,'course_data':course_data,'question_data':question_data}, context_instance=RequestContext(request))
+
+@login_required
+def add_comments(request):
+	if request.method == 'POST':
+		code = -1
+		msg = '未知错误'
+		content = request.POST['content']
+		user_id = request.POST['userid']
+		#comment_type = request.POST['comment_type']
+		#comment_id = request.POST['comment_id']
+		comment_type = 1 
+		comment_id = 1
+		curr_user = users_models.User.objects.get(id=user_id)
+		if comment_type == 0:
+			curr_question = comments_models.Question.objects.get(id=comment_id)
+			new_qc = comments_models.Question_Comment( \
+			date = datetime.datetime.now(),\
+			question = curr_question, user = curr_user, content=content)
+			new_qc.save()
+			code = 0
+			msg = ''
+
+		else:
+			curr_answer = comments_models.Answer.objects.get(id=comment_id)
+			new_ac = comments_models.Answer_Comment( \
+			date = datetime.datetime.now(),\
+			answer = curr_answer, user = curr_user, content=content)
+			new_ac.save()
+			code = 0
+			msg = ''
+
+		return HttpResponse(json.dumps({'code':code, 'msg': msg}), content_type="application/json")
+		
+	else:
+		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
+
 
 # why this does not work?
 def create(request):

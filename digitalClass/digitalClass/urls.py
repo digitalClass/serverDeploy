@@ -17,6 +17,8 @@ from django.conf.urls import url,include
 from django.contrib import admin
 from django.contrib.auth import urls
 from digitalClass.views import *
+from django.conf import settings
+from django.conf.urls import patterns 
 
 urlpatterns = [
     url(r'^$', homepage),
@@ -26,5 +28,12 @@ urlpatterns = [
     url(r'^accounts/', include('users.urls')),
     url(r'^accounts/profile/$', profile),
     url(r'^create/$', create, name="create_course"),
-    url(r'^classroom/(\d+)/(\d+)/(\d+)/$',classroom),
+    url(r'^addcomments/$', add_comments),
+    url(r'^classroom/(\d+)/(\w+)/(\d+)/$',classroom),
 ]
+
+if settings.DEBUG:
+    # static files (images, css, javascript, etc.)
+	    urlpatterns += patterns('',
+		        (r'^ppts/(?P<path>.*)$', 'django.views.static.serve', {
+						        'document_root': settings.MEDIA_ROOT}))
