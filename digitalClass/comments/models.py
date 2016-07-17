@@ -10,6 +10,7 @@ class Question(models.Model):
 	date = models.DateField()
 	user = models.ForeignKey(users_models.User,null=True)
 	course = models.ForeignKey(courses_models.Course,null=True)
+	ppt_file = models.ForeignKey(courses_models.PPTfile,null=True)
 	ppt_slice = models.ForeignKey(courses_models.PPTslice, null=True)
 	content = models.CharField(max_length=1024)
 	num_vote = models.IntegerField()
