@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Server Deploy
 This is sever deploy for the project of digital classroom which started by 2016 summer school of the USTC of software engeering.
 
