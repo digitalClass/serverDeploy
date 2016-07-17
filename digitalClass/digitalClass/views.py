@@ -16,21 +16,23 @@ from users.models import User
 
 now = datetime.datetime.now()
 def homepage(request):
-    if not request.user.is_authenticated():
-        return render_to_response("index.html")
+    if request.user.is_authenticated():
+        username = request.user.username
+        user_id = request.user.id
+        # te:Teacher;ta:TeachAssisstant;st:Student
+        user_role = request.user.user_role
+        return render_to_response("index.html",{'username':username,'user_id':user_id,'user_role':user_role,})
     else:
-        html = "<html><h1>need to be doen<h1><a href='/accounts/logout/'>注销</a></html>"
-        return HttpResponse(html)
+        return render_to_response("index.html")
 
 @login_required
 def profile(request):
     if request.user.is_authenticated():
-        user_email = request.user.email
-        user_name = request.user.username
+        username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-    return render_to_response('users/profile.html',{"user_name":user_name,})
+    return render_to_response('users/profile.html',{"username":username,'user_id':user_id,'user_role':user_role})
 
 def classroom(request, course_id, ppt_id, slice_id):
 	ppt_file = courses_models.PPTfile.objects.get(course=course_id, id=ppt_id)
@@ -53,7 +55,7 @@ def classroom(request, course_id, ppt_id, slice_id):
 
 
 	questions = comments_views.get_question(course_id, ppt_id, slice_id)
-	question_data = []	
+	question_data = []
 	for q in questions:
 		q_data = {}
 
