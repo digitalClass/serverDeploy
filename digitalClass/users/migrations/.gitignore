@@ -1,6 +1,5 @@
-*.py
-*.pyc
-
+*
 !0001_initial.py
 !0002_alter_user_last_login_null.py
 !__init__.py
+!.gitignore
