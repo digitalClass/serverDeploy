@@ -6,6 +6,7 @@ from django.shortcuts import render_to_response
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 import datetime
+import json
 
 from comments import models as comments_models
 from comments import views as comments_views
@@ -36,7 +37,7 @@ def profile(request):
 def classroom(request, course_id, ppt_title, slice_id):
 	ppt_file = courses_models.PPTfile.objects.get(course=course_id, title=ppt_title)
 	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_id)
-
+	
 #	ppt_slices_data = []
 	for slice in ppt_slices:
 		ps_data = {}
@@ -52,15 +53,15 @@ def classroom(request, course_id, ppt_title, slice_id):
 	course_data['course_id'] = course.course_id
 	course_data['title'] = course.title
 	teachers = course.teacher.all()
-	teacher_data = {}
+	teacher_data = []
 	for i in range(len(teachers)):
-		teacher_data[str(i)] = teachers[i].username
+		teacher_data.append(teachers[i].username)
 	course_data['teacher'] = teacher_data
 
 	tas = course.teaching_assitant.all()
-	tas_data = {}
+	tas_data = []
 	for i in range(len(tas)):
-		tas_data[str(i)] = tas[i].username
+		tas_data.append(tas[i].username)
 	course_data['teaching_assistant'] = tas_data
 	course_data['date'] = course.create_time
 
@@ -131,15 +132,16 @@ def add_comments(request):
 		msg = '未知错误'
 		content = request.POST['content']
 		user_id = request.POST['userid']
-		comment_type = request.POST['comment_type']
-		comment_id = request.POST['comment_id']
+		#comment_type = request.POST['comment_type']
+		#comment_id = request.POST['comment_id']
+		comment_type = 1 
+		comment_id = 1
 		curr_user = users_models.User.objects.get(id=user_id)
 		if comment_type == 0:
-			curr_question = comments_models.Questiion.objects.get(id=comment_id)
+			curr_question = comments_models.Question.objects.get(id=comment_id)
 			new_qc = comments_models.Question_Comment( \
-			date = datetime.datetime.today(),\
-			question = curr_question, \
-			user = curr_user)
+			date = datetime.datetime.now(),\
+			question = curr_question, user = curr_user, content=content)
 			new_qc.save()
 			code = 0
 			msg = ''
@@ -147,19 +149,18 @@ def add_comments(request):
 		else:
 			curr_answer = comments_models.Answer.objects.get(id=comment_id)
 			new_ac = comments_models.Answer_Comment( \
-			date = datetime.datetime.today(),\
-			answer = curr_answer, \
-			user = curr_user)
+			date = datetime.datetime.now(),\
+			answer = curr_answer, user = curr_user, content=content)
 			new_ac.save()
 			code = 0
 			msg = ''
 
-		render_to_response('addcomments.html', {'code':code, 'msg': msg}, \
-		context_instance= RequestContext(request))
+		print(code)
+		print(msg)
+		return HttpResponse(json.dumps({'code':code, 'msg': msg}), content_type="application/json")
 		
 	else:
-		render_to_response('addcomments.html', {'code':0, 'msg': ''}, \
-		context_instance= RequestContext(request))
+		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
 
 	
 # why this does not work?
