@@ -10,7 +10,7 @@ import json
 
 from comments import models as comments_models
 from comments import views as comments_views
-from users import models as users_models 
+from users import models as users_models
 from courses import models as courses_models
 from courses import views as courses_views
 
@@ -18,21 +18,28 @@ from users.models import User
 
 now = datetime.datetime.now()
 def homepage(request):
-    if not request.user.is_authenticated():
-        return render_to_response("index.html")
-    else:
-        html = "<html><h1>need to be doen<h1><a href='/accounts/logout/'>注销</a></html>"
-        return HttpResponse(html)
-
-@login_required
-def profile(request):
     if request.user.is_authenticated():
-        user_email = request.user.email
-        user_name = request.user.username
+        username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-    return render_to_response('users/profile.html',{"user_name":user_name,})
+        return render_to_response("index.html",{'username':username,'user_id':user_id,'user_role':user_role,})
+    else:
+        return render_to_response("index.html")
+
+@login_required
+def profile(request,
+        template_name="users/profile.html"):
+    if request.user.is_authenticated():
+        username = request.user.username
+        user_id = request.user.id
+        useravatar = request.user.useravatar
+        # te:Teacher;ta:TeachAssisstant;st:Student
+        user_role = request.user.user_role
+        c = Context({"username":username,"user_id":user_id,"user_role":user_role,"useravatar":useravatar,})
+        t = get_template(template_name)
+    else:username="游客"
+    return HttpResponse(t.render(c))
 
 def classroom(request, course_id, ppt_title, slice_id):
 	ppt_file = courses_models.PPTfile.objects.get(course=course_id, title=ppt_title)
@@ -65,9 +72,8 @@ def classroom(request, course_id, ppt_title, slice_id):
 	course_data['teaching_assistant'] = tas_data
 	course_data['date'] = course.create_time
 
-
 	questions = comments_views.get_question(course_id, ppt_title, slice_id)
-	question_data = []	
+	question_data = []
 	for q in questions:
 		q_data = {}
 
@@ -155,14 +161,12 @@ def add_comments(request):
 			code = 0
 			msg = ''
 
-		print(code)
-		print(msg)
 		return HttpResponse(json.dumps({'code':code, 'msg': msg}), content_type="application/json")
 		
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
 
-	
+
 # why this does not work?
 def create(request):
     return render_to_response('create.html')
