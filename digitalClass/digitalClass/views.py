@@ -38,13 +38,14 @@ def profile(request,
         user_role = request.user.user_role
         c = Context({"username":username,"user_id":user_id,"user_role":user_role,"useravatar":useravatar,})
         t = get_template(template_name)
-    else:username="游客"
+    # else:username="游客"
+    # 若未登录而进入profile会跳到登录页面
     return HttpResponse(t.render(c))
 
 def classroom(request, course_id, ppt_title, slice_id):
 	ppt_file = courses_models.PPTfile.objects.get(course=course_id, title=ppt_title)
 	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_id)
-	
+
 #	ppt_slices_data = []
 	for slice in ppt_slices:
 		ps_data = {}
@@ -140,7 +141,7 @@ def add_comments(request):
 		user_id = request.POST['userid']
 		#comment_type = request.POST['comment_type']
 		#comment_id = request.POST['comment_id']
-		comment_type = 1 
+		comment_type = 1
 		comment_id = 1
 		curr_user = users_models.User.objects.get(id=user_id)
 		if comment_type == 0:
@@ -162,13 +163,13 @@ def add_comments(request):
 			msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg}), content_type="application/json")
-		
+
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
 
-
-# why this does not work?
 def create(request):
+    if request.user.user_role=="st":
+        return render_to_response("premissionDeniey.html")
     return render_to_response('create.html')
 
 # for logout quiet;
