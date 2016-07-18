@@ -3,11 +3,11 @@ from django.shortcuts import render
 from comments.models import Question, Answer, Question_Comment, Answer_Comment
 from courses.models import Course, PPTfile, PPTslice
 # Create your views here.
-def get_question(course_id, ppt_title, slice_id):
+def get_question(course_id, ppt_title, slice_index):
 	curr_course = Course.objects.get(id=course_id)	
 	curr_ppt_file = PPTfile.objects.get(course=curr_course,title=ppt_title)	
 
-	curr_slice = PPTslice.objects.get(pptfile=curr_ppt_file,index=slice_id)	
+	curr_slice = PPTslice.objects.get(pptfile=curr_ppt_file,index=slice_index)	
 	questions = Question.objects.filter(course=curr_course, ppt_file=curr_ppt_file,ppt_slice=curr_slice)
 	
 	return questions
