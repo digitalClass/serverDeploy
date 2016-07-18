@@ -53,6 +53,7 @@ def register(request,
     if request.method == 'POST':
         form = registration_form(request.POST)
         if form.is_valid():
+            # user.useravatar=SaveFile(request.FILES['useravatar'],'avatar/')
             user = form.save()
             if settings.USERS_AUTO_LOGIN_AFTER_REGISTRATION:
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -172,3 +173,12 @@ def activation_complete(request,
         context.update(extra_context)
     return TemplateResponse(request, template_name, context,
                             current_app=current_app)
+# def SaveFile(file,path='',fileName=''):
+#     fileName=file._get_name() if fileName=='' else fileName
+#     filePath=str(path)+str(fileName)
+#     rootFilePath='%s%s' %(settings.MEDIA_ROOT,filePath)
+#     fd=open(rootFilePath,'wb')
+#     for chunk in file.chunks():
+#         fd.write(chunk)
+#     fd.close()
+#     return filePath

@@ -47,7 +47,7 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
             max_length=2,
             choices=USER_ROLE,
             default=STUDENT)
-    useravatar = models.CharField(max_length=50,null = True)
+    useravatar = models.ImageField('用户头像',upload_to="avatar",null = True)
 
     objects = UserInheritanceManager()
     base_objects = UserManager()

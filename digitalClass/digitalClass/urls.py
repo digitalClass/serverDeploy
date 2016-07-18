@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.contrib.auth import urls
 from digitalClass.views import *
 from django.conf import settings
-from django.conf.urls import patterns 
+from django.conf.urls import patterns
 from courses import views as courses_views
 from django.views.static import serve
 

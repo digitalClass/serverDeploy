@@ -214,3 +214,7 @@ def create(request):
 def logout_user(request):
     logout(request)
     return HttpResponseRedirect("/?message=logout")#request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+def courses(request):
+    return HttpResponseRedirect("CourseList/Chapter01.html")

@@ -15,6 +15,7 @@ class UserCreationForm(forms.ModelForm):
     error_messages = {
         'duplicate_email': _('A user with that email already exists.'),
         'password_mismatch': _('The two password fields didn\'t match.'),
+        'student_number':_('The number is not a valid USTC student number.')
     }
 
     username = models.CharField(max_length=30)
@@ -27,6 +28,7 @@ class UserCreationForm(forms.ModelForm):
     password2 = PasswordField(
         label=_('重复密码'),
         help_text=_(''))
+    useravatar = models.ImageField(max_length=100),
 
     class Meta:
         model = get_user_model()

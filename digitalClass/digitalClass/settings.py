@@ -160,6 +160,6 @@ DEFAULT_FROM_EMAIL = 'hzh8311@mail.ustc.edu.cn'
 #sending e-mails account
 USERS_CREATE_SUPERUSER = DEBUG
 
-MEDIA_URL = '/ppts/' 
+MEDIA_URL = '/ppts/'
 #MEDIA_ROOT = os.path.join(SITE_ROOT,'ppts')
 MEDIA_ROOT = '/home/yunfeng/ppts/'
