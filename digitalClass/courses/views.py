@@ -84,12 +84,13 @@ def course_page(request, c_id):
 	raise Http404()
     c = Course.objects.get(id=course_id)
     Is_this_course_teacher = False
-    if is_authenticated():
+    if request.user.is_authenticated():
 	user_id = request.user.id
 	u = c.teacher.filter(id=user_id)
-	if u != []:
+	if u:
 	    Is_this_course_teacher=True
-    return render_to_response('course_page.html',{'course':c, 'Is_this_course_teacher':Is_this_course_teacher})
+    	    return render_to_response('test_course/course_page.html',{'course':c, 'Is_this_course_teacher':Is_this_course_teacher,'user':u})
+    return render_to_response('test_course/course_page.html',{'course':c, 'Is_this_course_teacher':Is_this_course_teacher})
 
 
 
