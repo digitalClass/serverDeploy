@@ -14,6 +14,7 @@ from users import models as users_models
 from courses import models as courses_models
 from courses import views as courses_views
 from digitalClass import models as digital_models
+from django.core.mail import send_mail
 
 from users.models import User
 
@@ -183,6 +184,15 @@ def feedback(request):
 		feedback.save()
 		code= 0
 		msg = ''
+
+		send_mail(
+			'feedback',
+			content,
+			None,
+			['ustcfighters@126.com'],
+			fail_silently=False
+		)	
+
 		return HttpResponseRedirect('/thanks/')
 
 	else:
