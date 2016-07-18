@@ -20,6 +20,7 @@ from digitalClass.views import *
 from django.conf import settings
 from django.conf.urls import patterns 
 from courses import views as courses_views
+from django.views.static import serve
 
 urlpatterns = [
     url(r'^$', homepage),
@@ -42,6 +43,5 @@ urlpatterns += [
 ]
 if settings.DEBUG:
     # static files (images, css, javascript, etc.)
-	    urlpatterns += patterns('',
-		        (r'^ppts/(?P<path>.*)$', 'django.views.static.serve', {
-						        'document_root': settings.MEDIA_ROOT}))
+	urlpatterns += patterns('',
+		(r'^ppts/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))

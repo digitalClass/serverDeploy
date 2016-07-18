@@ -14,6 +14,7 @@ from users import models as users_models
 from courses import models as courses_models
 from courses import views as courses_views
 from digitalClass import models as digital_models
+from django.core.mail import send_mail
 
 from users.models import User
 
@@ -39,13 +40,14 @@ def profile(request,
         user_role = request.user.user_role
         c = Context({"username":username,"user_id":user_id,"user_role":user_role,"useravatar":useravatar,})
         t = get_template(template_name)
-    else:username="游客"
+    # else:username="游客"
+    # 若未登录而进入profile会跳到登录页面
     return HttpResponse(t.render(c))
 
 def classroom(request, course_id, ppt_title, slice_id):
 	ppt_file = courses_models.PPTfile.objects.get(course=course_id, title=ppt_title)
 	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_id)
-	
+
 #	ppt_slices_data = []
 	for slice in ppt_slices:
 		ps_data = {}
@@ -79,6 +81,7 @@ def classroom(request, course_id, ppt_title, slice_id):
 		q_data = {}
 
 		#get basic info about the certain question
+		q_data['question_id'] = q.id
 		q_data['username'] = q.user.username
 		q_data['date'] = q.date
 		q_data['content'] = q.content
@@ -100,6 +103,7 @@ def classroom(request, course_id, ppt_title, slice_id):
 		answers_data = []
 		for a in answers:
 			a_data = {}
+			a_data['answer_id'] = a.id
 			a_data['username'] = a.user.username
 			a_data['date'] = a.date
 			a_data['content'] = a.content
@@ -136,16 +140,16 @@ def classroom(request, course_id, ppt_title, slice_id):
 def add_comments(request):
 	if request.method == 'POST':
 		code = -1
-		msg = '未知错误'
+		msg = '请检查是否登录'
 		content = request.POST['content']
-		user_id = request.POST['userid']
-		#comment_type = request.POST['comment_type']
-		#comment_id = request.POST['comment_id']
-		comment_type = 1 
-		comment_id = 1
+		user_id = request.user.id
+		comment_id = request.POST['comment_id']
+		question_id = request.POST['question_id']
 		curr_user = users_models.User.objects.get(id=user_id)
-		if comment_type == 0:
-			curr_question = comments_models.Question.objects.get(id=comment_id)
+
+		#comment on question
+		if comment_id < 0:
+			curr_question = comments_models.Question.objects.get(id=question_id)
 			new_qc = comments_models.Question_Comment( \
 			date = datetime.datetime.now(),\
 			question = curr_question, user = curr_user, content=content)
@@ -153,6 +157,7 @@ def add_comments(request):
 			code = 0
 			msg = ''
 
+		#comment on answer
 		else:
 			curr_answer = comments_models.Answer.objects.get(id=comment_id)
 			new_ac = comments_models.Answer_Comment( \
@@ -163,7 +168,7 @@ def add_comments(request):
 			msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg}), content_type="application/json")
-		
+
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
 
@@ -180,16 +185,27 @@ def feedback(request):
 		feedback.save()
 		code= 0
 		msg = ''
+
+		send_mail(
+			'feedback',
+			content,
+			None,
+			['ustcfighters@126.com'],
+			fail_silently=False
+		)
+
 		return HttpResponseRedirect('/thanks/')
 
 	else:
 		return render_to_response('feedback.html', context_instance=RequestContext(request))
-		
+
 def thanks(request):
 	return render_to_response('thanks.html')
 
 # why this does not work?
 def create(request):
+    if request.user.user_role=="st":
+        return render_to_response("premissionDeniey.html")
     return render_to_response('create.html')
 
 # for logout quiet;
