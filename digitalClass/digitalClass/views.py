@@ -213,4 +213,4 @@ def create(request):
 @login_required
 def logout_user(request):
     logout(request)
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    return HttpResponseRedirect("/?message=logout")#request.META.get('HTTP_REFERER', '/'))
