@@ -20,6 +20,8 @@ class Course(models.Model):
 	teacher = models.ManyToManyField(users_models.User,related_name="teacher")
 	#课程助教
 	teaching_assitant = models.ManyToManyField(users_models.User, related_name="teaching_assistant")
+	#订阅该课程用户
+	subscribed_user = models.ManyToManyField(users_models.User,related_name="subscribed_user")
 	def __str__(self):
 	    return self.title
 	class Meta:
