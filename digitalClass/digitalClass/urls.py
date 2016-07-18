@@ -19,6 +19,7 @@ from django.contrib.auth import urls
 from digitalClass.views import *
 from django.conf import settings
 from django.conf.urls import patterns 
+from courses import views as courses_views
 from django.views.static import serve
 
 urlpatterns = [
@@ -28,13 +29,18 @@ urlpatterns = [
     url(r'^accounts/logout$',logout_user),
     url(r'^accounts/', include('users.urls')),
     url(r'^accounts/profile/$', profile),
-    url(r'^create/$', create, name="create_course"),
+    #url(r'^create/$', create, name="create_course"),
     url(r'^addcomments/$', add_comments),
     url(r'^feedback/$', feedback),
     url(r'^thanks/$', thanks),
     url(r'^classroom/(\d+)/(\w+)/(\d+)/$',classroom),
 ]
 
+urlpatterns += [
+    url(r'^create/$', courses_views.create_course),
+    url(r'^course_page/(\d+)/$', courses_views.course_page),
+    url(r'ppt_upload/$', courses_views.ppt_upload),
+]
 if settings.DEBUG:
     # static files (images, css, javascript, etc.)
 	urlpatterns += patterns('',
