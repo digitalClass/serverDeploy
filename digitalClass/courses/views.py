@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect,Http404
 from courses.models import Course, PPTfile, PPTslice
 from users.models import User
 from form import *
+from django.template import RequestContext
 
 import datetime
 # Create your views here.
@@ -69,7 +70,7 @@ def create_course(request):
 		    return HttePresponseRedirect('/accounts/profile/')
 	    else:
 		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
-    	    return render_to_response('create.html',{'form':form})
+    	    return render_to_response('create.html',{'form':form},context_instance=RequestContext(request))
     return render_to_response("premissionDeniey.html")
 
 def course_page(request, c_id):
