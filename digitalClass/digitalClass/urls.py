@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'^accounts/logout$',logout_user),
     url(r'^accounts/', include('users.urls')),
     url(r'^accounts/profile/$', profile),
-    url(r'^create/$', create, name="create_course"),
+    #url(r'^create/$', create, name="create_course"),
     url(r'^addcomments/$', add_comments),
     url(r'^feedback/$', feedback),
     url(r'^thanks/$', thanks),

@@ -36,7 +36,7 @@ def profile(request):
 	else:
 	    #Student's profile
 	    return HttpResponseRedirect('')
-    return HttpResponseRedirect('')
+    return render_to_response("premissionDeniey.html")
 
 @login_required
 def create_course(request):
@@ -69,9 +69,8 @@ def create_course(request):
 		    return HttePresponseRedirect('/accounts/profile/')
 	    else:
 		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
-    	    return render_to_response('test_template/create_course.html',{'form':form})
-    return HttePresponseRedirect('')
-
+    	    return render_to_response('create.html',{'form':form})
+    return render_to_response("premissionDeniey.html")
 
 def course_page(request, c_id):
     #course page
@@ -110,7 +109,7 @@ def ppt_upload(request,c_id):
 	    else:
 		form = UploadPPTForm()
 	    return render_to_response('ppt_upload.html',{'form':form})
-    return HttpResponseRedirect('')
+    return render_to_response("premissionDeniey.html")
 
 def handle_upload_file(f):
     file_name=""
