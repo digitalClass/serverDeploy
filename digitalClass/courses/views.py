@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect,Http404
 from courses.models import Course, PPTfile, PPTslice
@@ -54,7 +54,6 @@ def create_course(request):
 	#Course.save()
 	#add Course.teacher
     #else -> redirect
-    errors = []
     if request.user.is_authenticated():
 	if request.user.user_role == 'te':
 	    if request.method == 'POST':
@@ -67,15 +66,11 @@ def create_course(request):
 		    c = Course.objects.create(introduce=f['course_date'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
 		    u = User.objects.get(id=user_id)
 		    c.teacher.add(u)
-		    return HttePresponseRedirect('/accounts/profile')
-		else:
-		    for k,v in f.errors:
-			errors.append(v)
+		    return HttePresponseRedirect('/accounts/profile/')
 	    else:
 		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
-	else:
-	    errors.append('You have no priority to create a course.')
-    return render_to_reponse('create_course',{'form':form, 'errors':errors})
+    	    return render_to_response('test_template/create_course.html',{'form':form})
+    return HttePresponseRedirect('')
 
 
 def course_page(request, c_id):
