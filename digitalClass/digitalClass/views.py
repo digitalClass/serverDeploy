@@ -44,9 +44,10 @@ def profile(request,
     # 若未登录而进入profile会跳到登录页面
     return HttpResponse(t.render(c))
 
-def classroom(request, course_id, ppt_title, slice_id):
-	ppt_file = courses_models.PPTfile.objects.get(course=course_id, title=ppt_title)
-	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_id)
+def classroom(request, course_id, ppt_title, slice_index):
+	course  = courses_models.Course.objects.get(id=course_id)
+	ppt_file = courses_models.PPTfile.objects.get(course=course, title=ppt_title)
+	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_index)
 
 #	ppt_slices_data = []
 	for slice in ppt_slices:
@@ -75,7 +76,7 @@ def classroom(request, course_id, ppt_title, slice_id):
 	course_data['teaching_assistant'] = tas_data
 	course_data['date'] = course.create_time
 
-	questions = comments_views.get_question(course_id, ppt_title, slice_id)
+	questions = comments_views.get_question(course_id, ppt_title, slice_index)
 	question_data = []
 	for q in questions:
 		q_data = {}
@@ -126,6 +127,7 @@ def classroom(request, course_id, ppt_title, slice_id):
 		q_data['answers'] = answers_data
 		question_data.append(q_data)
 
+	user_data = request.user.username
 	print('question_data')
 	print(question_data)
 
@@ -134,21 +136,58 @@ def classroom(request, course_id, ppt_title, slice_id):
 
 	print('course_data')
 	print(course_data)
-	return render_to_response('player.html', {'ppt_slices_data': ppt_slices_data,'course_data':course_data,'question_data':question_data}, context_instance=RequestContext(request))
+	print('user_data')
+	print(user_data)
+
+	return render_to_response('player.html', {'user_data': user_data, 'ppt_slices_data': ppt_slices_data,'course_data':course_data,'question_data':question_data}, context_instance=RequestContext(request))
 
 @login_required
 def add_comments(request):
+	now = datetime.datetime.now()
 	if request.method == 'POST':
+		print(request.POST)
 		code = -1
 		msg = '请检查是否登录'
+		new_answer_id = -4
 		content = request.POST['content']
-		user_id = request.user.id
-		comment_id = request.POST['comment_id']
-		question_id = request.POST['question_id']
+		user_id = int(request.user.id)
+		question_id = int(request.POST['question_id'])
+		answer_id = int(request.POST['answer_id'])
+		course_id = int(request.POST['course_id'])
+		ppt_file_title = request.POST['ppt_file_title']
+		ppt_slice_id = int(request.POST['ppt_slice_id'])
+		
 		curr_user = users_models.User.objects.get(id=user_id)
 
-		#comment on question
-		if comment_id < 0:
+		#create a question
+		if answer_id == -5:
+			course = courses_models.Course.objects.get(id=course_id)
+			ppt_file = courses_models.PPTfile.objects.get(course=course, \
+			title=ppt_file_title)
+			ppt_slice = courses_models.PPTslice.objects.get(pptfile=ppt_file, index=ppt_slice_id)
+
+			new_question = comments_models.Question(date=now, user=request.user,\
+			course=course,ppt_file=ppt_file, ppt_slice=ppt_slice, content=content,\
+			num_vote = 0)
+			new_question.save()
+			code = 0
+			msg = ''
+
+		#create an answer 
+		elif answer_id == -2:
+			course = courses_models.Course.objects.get(id=course_id)
+			question = comments_models.Question.objects.get(id=question_id)
+#			curr_user_role = .Answer.objects.get(id=comment_id)
+			new_answer= comments_models.Answer(date=now, user=request.user,\
+			course=course, question=question, user_role=request.user.user_role,\
+			content=content, num_vote=0)
+			new_answer.save()
+			new_answer_id = new_answer.id
+			code = 0
+			msg = ''
+
+		#comment on a quesiton
+		elif answer_id == -1:
 			curr_question = comments_models.Question.objects.get(id=question_id)
 			new_qc = comments_models.Question_Comment( \
 			date = datetime.datetime.now(),\
@@ -157,9 +196,9 @@ def add_comments(request):
 			code = 0
 			msg = ''
 
-		#comment on answer
-		else:
-			curr_answer = comments_models.Answer.objects.get(id=comment_id)
+		#comment on an answer 
+		elif answer_id >= 0:
+			curr_answer = comments_models.Answer.objects.get(id=answer_id)
 			new_ac = comments_models.Answer_Comment( \
 			date = datetime.datetime.now(),\
 			answer = curr_answer, user = curr_user, content=content)
@@ -167,15 +206,13 @@ def add_comments(request):
 			code = 0
 			msg = ''
 
-		return HttpResponse(json.dumps({'code':code, 'msg': msg}), content_type="application/json")
+		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':new_answer_id}), content_type="application/json")
 
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
 
 def feedback(request):
 	if request.method == "POST":
-		code = -1
-		msg = '未知错误'
 		user = request.user
 		if user.is_anonymous():
 			user = None
@@ -183,9 +220,6 @@ def feedback(request):
 		content = request.POST['content']
 		feedback = digital_models.Feedback(date=date, user=user, content=content)
 		feedback.save()
-		code= 0
-		msg = ''
-
 		send_mail(
 			'feedback',
 			content,
@@ -193,9 +227,7 @@ def feedback(request):
 			['ustcfighters@126.com'],
 			fail_silently=False
 		)
-
 		return HttpResponseRedirect('/thanks/')
-
 	else:
 		return render_to_response('feedback.html', context_instance=RequestContext(request))
 
