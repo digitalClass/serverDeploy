@@ -29,6 +29,8 @@ urlpatterns = [
     url(r'^accounts/profile/$', profile),
     url(r'^create/$', create, name="create_course"),
     url(r'^addcomments/$', add_comments),
+    url(r'^feedback/$', feedback),
+    url(r'^thanks/$', thanks),
     url(r'^classroom/(\d+)/(\w+)/(\d+)/$',classroom),
 ]
 

@@ -13,6 +13,7 @@ from comments import views as comments_views
 from users import models as users_models
 from courses import models as courses_models
 from courses import views as courses_views
+from digitalClass import models as digital_models
 
 from users.models import User
 
@@ -166,6 +167,26 @@ def add_comments(request):
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
 
+def feedback(request):
+	if request.method == "POST":
+		code = -1
+		msg = '未知错误'
+		user = request.user
+		if user.is_anonymous():
+			user = None
+		date = datetime.datetime.now()
+		content = request.POST['content']
+		feedback = digital_models.Feedback(date=date, user=user, content=content)
+		feedback.save()
+		code= 0
+		msg = ''
+		return HttpResponseRedirect('/thanks/')
+
+	else:
+		return render_to_response('feedback.html', context_instance=RequestContext(request))
+		
+def thanks(request):
+	return render_to_response('thanks.html')
 
 # why this does not work?
 def create(request):
