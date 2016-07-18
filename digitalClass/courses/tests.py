@@ -1,23 +1,24 @@
 from django.test import TestCase
-from courses import models
 from users import models as users_models
+from courses.models import Course
 import datetime
-# Create your tests here.
-#cobby = users_models.User.objects.create(username='cobby', student_id='PB11210098', email='cobby@mail.ustc.edu.cn', password='123456', user_role='te',gender='m')
+from django.utils import timezone 
+
+print "import OK"
+now = timezone.now()
+print now
 #zhang = users_models.User.objects.create(username='zhang', student_id='SA15006070', email='zhang@mail.ustc.edu.cn', password='123456', user_role='st',gender='m')
-class CourseTestCase(TestCase):
+#cobby = users_models.User.objects.create(username='cobby', student_id='PB11210098', email='cobby@mail.ustc.edu.cn', password='123456', user_role='te',gender='m')
+class CreateTestCase(TestCase):
     def setUp(self):
-	now = datetime.datetime.now()
-	Course.objects.create(introduce='This is a math class', create_time=now, img_path='courses/test_img.jpg)', title='math', course_id='ABC123' )
-	#math.teacher.add(cobby)
-    def testCourseCreate(self):
-	math = Course.objects.get(title='math')	
-	print math.tercher.all()
-	#cobby.teacher.all()
-
-
-
-
+	Course.objects.create(introduce='This is a math course', create_time=now, img_path='/courses/1.jpg', title='math', course_id='MATH_A')
+	Course.objects.create(introduce='This is a English course', create_time=now, img_path='/courses/1.jpg', title='English', course_id='ENGLISH_A')
+	print "CreateTestCase_setUp is right"
+    def test_Course(self):
+	math = Course.objects.get(title='math')
+	english = Course.objects.get(title='english')
+	print math.title,math.introduce,math.create_time,math.img_path,math.course_id
+	print english
 
 
 
