@@ -73,13 +73,3 @@ class Video(models.Model):
 
 
 
-
-
-
-
-
-
-
-
-
-

@@ -36,7 +36,7 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    url(r'^create_course/$', courses_views.create_course),
+    url(r'^create/$', courses_views.create_course),
     url(r'^course_page/(\d+)/$', courses_views.course_page),
     url(r'ppt_upload/$', courses_views.ppt_upload),
 ]
