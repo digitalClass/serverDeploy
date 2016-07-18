@@ -60,14 +60,15 @@ def create_course(request):
 	    if request.method == 'POST':
 		form = CreateCourseForm(request.POST)
 		if form.is_valid():
+		    print "form is ",form.is_valid()
 		    f = form.cleaned_data
 		    now = datetime.datetime.now()
 		    img = ''
 		    user_id = request.user.id
-		    c = Course.objects.create(introduce=f['course_date'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
+		    c = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
 		    u = User.objects.get(id=user_id)
 		    c.teacher.add(u)
-		    return HttePresponseRedirect('/accounts/profile/')
+		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
 		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
     	    return render_to_response('create.html',{'form':form},context_instance=RequestContext(request))
