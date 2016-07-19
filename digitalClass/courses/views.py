@@ -1,6 +1,6 @@
 from django.shortcuts import render,render_to_response
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect,Http404
+from django.http import HttpResponseRedirect,Http404,HttpResponse
 from courses.models import Course, PPTfile, PPTslice
 from users.models import User
 from form import *
@@ -16,7 +16,7 @@ def profile(request):
     #authenticated -> get basic information from request.user
     #three part,request.user.user_role,only teacher's part now
     #if user is a teacher
-	#get User object due to id
+	#get User object according to id
 	#related_name='teacher'Course and User has a ManyToMany table
 	#return course list
     #a teaching assistant
@@ -26,18 +26,23 @@ def profile(request):
         user_email = request.user.email
         user_name = request.user.username
         user_id = request.user.id
+	useravatar = request.user.useravatar
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
+	try:
+	    user = User.objects.get(id=user_id)
+	except User.DoesNotExist:
+	    return HttpResponse('something wrong!')
+
 	if user_role == 'te':
-	    teacher = User.objects.get(id=user.id)
-	    courses_list = teacher.teacher.all()
-	    return render_to_response('users/profile.html',{"user_name":user_name, "course_list":course_list})
+	    course_list = user.teacher.all()
 	elif user_role == 'ta':
 	    return HttpResponseRedirect('')
 	 #Teaching Assistant's profile
 	else:
 	    #Student's profile
-	    return HttpResponseRedirect('')
+	    course_list = user.subscribed_user.all()
+	return render_to_response('users/profile.html',{"user_name":user_name,"user_id":user_id,"user_role":user_role,"useravatar":useravatar, "course_list":course_list})
     return render_to_response("premissionDeniey.html")
 
 @login_required
@@ -83,7 +88,10 @@ def course_page(request, c_id):
 	course_id = int(c_id)
     except ValueError:
 	raise Http404()
-    c = Course.objects.get(id=course_id)
+    try:
+        c = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+	return HttpResponse('Course does not exist')
     ppts = c.pptfile_set.all()
     Is_this_course_teacher = False
     if request.user.is_authenticated():
