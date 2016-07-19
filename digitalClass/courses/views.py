@@ -106,7 +106,7 @@ def course_page(request, c_id):
 	if s:
 	    Is_subscribed = True
         if request.method == 'POST':
-	    if request.subscribed_status_changed:
+	    if request.POST.subscribed_status_changed:
 		if Is_subscribed:
 		    course.subscribed_user.delete()
 		    Is_subscribed = False
@@ -144,9 +144,9 @@ def course_test(request, c_id):
 	if s:
 	    Is_subscribed = True
         if request.method == 'POST':
-	    if request.subscribed_status_changed:
+	    if request.POST['subscribed_status_changed']==u'True':
 		if Is_subscribed:
-		    course.subscribed_user.delete()
+		    course.subscribed_user.remove(request.user)
 		    Is_subscribed = False
 		else:
 		    course.subscribed_user.add(request.user)
