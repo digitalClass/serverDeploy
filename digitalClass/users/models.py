@@ -26,7 +26,7 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
                 'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     username = models.CharField(_('用户名'),max_length=30, unique=True, null=True)
-    student_id = models.CharField('学号或工号',max_length=30, unique=True, null=True)
+    student_id = models.CharField('学号或工号',max_length=30, unique=True, null=True, blank=True)
 
     MALE = 'm'
     FEMALE = 'f'
@@ -47,7 +47,7 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
             max_length=2,
             choices=USER_ROLE,
             default=STUDENT)
-    useravatar = models.ImageField('用户头像',upload_to="avatar",null = True)
+    useravatar = models.ImageField('用户头像',upload_to="avatar",null = True, blank=True)
 
     objects = UserInheritanceManager()
     base_objects = UserManager()
