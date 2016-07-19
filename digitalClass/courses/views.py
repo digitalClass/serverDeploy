@@ -1,3 +1,4 @@
+#coding:utf-8
 from django.shortcuts import render,render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect,Http404,HttpResponse
@@ -89,17 +90,34 @@ def course_page(request, c_id):
     except ValueError:
 	raise Http404()
     try:
-        c = Course.objects.get(id=course_id)
+        course = Course.objects.get(id=course_id)
     except Course.DoesNotExist:
 	return HttpResponse('Course does not exist')
-    ppts = c.pptfile_set.all()
+    ppts = course.pptfile_set.all()
     Is_this_course_teacher = False
+    Is_subscribed = False
+    
     if request.user.is_authenticated():
 	user_id = request.user.id
-	u = c.teacher.filter(id=user_id)
+	u = course.teacher.filter(id=user_id)
 	if u:
 	    Is_this_course_teacher=True
-    return render_to_response('course.html',{'course':c, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher})
+	s = course.subscribed_user.filter(id=user_id)
+	if s:
+	    Is_subscribed = True
+        if request.method == 'POST':
+	    if request.POST.subscribed_status_changed:
+		if Is_subscribed:
+		    course.subscribed_user.delete()
+		    Is_subscribed = False
+		else:
+		    course.subscribed_user.add(request.user)
+		    Is_subscribed = True
+    else:
+	if request.method == 'POST':
+	    return HttpResponseRedirect('/accounts/login/')
+    return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed},context_instance=RequestContext(request))
+    #return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed})
 
 def course_test(request, c_id):
     #course page
@@ -109,15 +127,34 @@ def course_test(request, c_id):
 	course_id = int(c_id)
     except ValueError:
 	raise Http404()
-    c = Course.objects.get(id=course_id)
-    ppts = c.pptfile_set.all()
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+	return HttpResponse('Course does not exist')
+    ppts = course.pptfile_set.all()
     Is_this_course_teacher = False
+    Is_subscribed = False
+    
     if request.user.is_authenticated():
 	user_id = request.user.id
-	u = c.teacher.filter(id=user_id)
+	u = course.teacher.filter(id=user_id)
 	if u:
 	    Is_this_course_teacher=True
-    return render_to_response('test_course/course_page.html',{'course':c, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher})
+	s = course.subscribed_user.filter(id=user_id)
+	if s:
+	    Is_subscribed = True
+        if request.method == 'POST':
+	    if request.POST['subscribed_status_changed']==u'True':
+		if Is_subscribed:
+		    course.subscribed_user.remove(request.user)
+		    Is_subscribed = False
+		else:
+		    course.subscribed_user.add(request.user)
+		    Is_subscribed = True
+    else:
+	if request.method == 'POST':
+	    return HttpResponseRedirect('/accounts/login/')
+    return render_to_response('test_course/course_page.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed},context_instance=RequestContext(request))
 
 
 
