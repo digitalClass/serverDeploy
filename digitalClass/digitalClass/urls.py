@@ -38,8 +38,9 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^create/$', courses_views.create_course),
-    url(r'^course_page/(\d+)/$', courses_views.course_page),
-    url(r'ppt_upload/$', courses_views.ppt_upload),
+    url(r'^course/(\d+)/$', courses_views.course_page),
+    url(r'^course_test/(\d+)/$', courses_views.course_test),
+    url(r'^course/(\d+)/ppt_upload/$', courses_views.ppt_upload),
 ]
 if settings.DEBUG:
     # static files (images, css, javascript, etc.)

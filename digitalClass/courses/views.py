@@ -5,6 +5,7 @@ from courses.models import Course, PPTfile, PPTslice
 from users.models import User
 from form import *
 from django.template import RequestContext
+import os
 
 import datetime
 # Create your views here.
@@ -83,14 +84,33 @@ def course_page(request, c_id):
     except ValueError:
 	raise Http404()
     c = Course.objects.get(id=course_id)
+    ppts = c.pptfile_set.all()
     Is_this_course_teacher = False
     if request.user.is_authenticated():
 	user_id = request.user.id
 	u = c.teacher.filter(id=user_id)
 	if u:
 	    Is_this_course_teacher=True
-    	    return render_to_response('test_course/course_page.html',{'course':c, 'Is_this_course_teacher':Is_this_course_teacher,'user':u})
-    return render_to_response('test_course/course_page.html',{'course':c, 'Is_this_course_teacher':Is_this_course_teacher})
+    return render_to_response('course.html',{'course':c, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher})
+
+def course_test(request, c_id):
+    #course page
+    #courses' information,ppt list are needed
+    #Is_this_course_teacher 
+    try:
+	course_id = int(c_id)
+    except ValueError:
+	raise Http404()
+    c = Course.objects.get(id=course_id)
+    ppts = c.pptfile_set.all()
+    Is_this_course_teacher = False
+    if request.user.is_authenticated():
+	user_id = request.user.id
+	u = c.teacher.filter(id=user_id)
+	if u:
+	    Is_this_course_teacher=True
+    return render_to_response('test_course/course_page.html',{'course':c, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher})
+
 
 
 
@@ -108,10 +128,10 @@ def ppt_upload(request,c_id):
 		if form.is_valid():
 		    handle_upload_file(request.FILES['file'])
 		    #return render_to_response()
-		    return HttpResponse("Successful")
+		    return HttpResponse("Successful.html")
 	    else:
 		form = UploadPPTForm()
-	    return render_to_response('ppt_upload.html',{'form':form})
+	    return render_to_response('test_course/ppt_upload.html',{'form':form}, context_instance=RequestContext(request))
     return render_to_response("premissionDeniey.html")
 
 def handle_upload_file(f):
