@@ -28,7 +28,7 @@ urlpatterns = [
 # app users
     url(r'^accounts/logout$',logout_user),
     url(r'^accounts/', include('users.urls')),
-    url(r'^accounts/profile/$', profile),
+    #url(r'^accounts/profile/$', profile),
     #url(r'^create/$', create, name="create_course"),
     url(r'^addcomments/$', add_comments),
     url(r'^feedback/$', feedback),
@@ -38,10 +38,14 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^create/$', courses_views.create_course),
-    url(r'^course_page/(\d+)/$', courses_views.course_page),
-    url(r'ppt_upload/$', courses_views.ppt_upload),
+    url(r'^course/(\d+)/$', courses_views.course_page),
+    url(r'^accounts/profile/$', courses_views.profile),
+    url(r'^course/(\d+)/ppt_upload/$', courses_views.ppt_upload),
 ]
 if settings.DEBUG:
     # static files (images, css, javascript, etc.)
-	urlpatterns += patterns('',
-		(r'^ppts/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))
+    urlpatterns += [
+        url(r'^course_test/(\d+)/$', courses_views.course_test),
+]
+    urlpatterns += patterns('',
+	(r'^ppts/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))
