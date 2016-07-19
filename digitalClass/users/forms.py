@@ -1,7 +1,10 @@
+#!coding:utf8
+from __future__ import unicode_literals
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import ugettext_lazy as _
+from django.db import models
 
 from .conf import settings
 from .fields import HoneyPotField, PasswordField, UsersEmailField
@@ -12,17 +15,24 @@ class UserCreationForm(forms.ModelForm):
     error_messages = {
         'duplicate_email': _('A user with that email already exists.'),
         'password_mismatch': _('The two password fields didn\'t match.'),
+        'student_number':_('The number is not a valid USTC student number.')
     }
 
-    email = UsersEmailField(label=_('Email Address'), max_length=255)
-    password1 = PasswordField(label=_('Password'))
+    username = models.CharField(max_length=30)
+    student_id = models.CharField(max_length=11)
+    gender = models.CharField(max_length=1)
+    email = UsersEmailField(label=_('电子邮件'), max_length=255)
+    USER_ROLE=(('st','学生'),('te','老师'),('ta','助教'),)
+    user_role = models.CharField(max_length=2)
+    password1 = PasswordField(label=_('密码'))
     password2 = PasswordField(
-        label=_('Password Confirmation'),
-        help_text=_('Enter the same password as above, for verification.'))
+        label=_('重复密码'),
+        help_text=_(''))
+    useravatar = models.ImageField(max_length=100),
 
     class Meta:
         model = get_user_model()
-        fields = ('email',)
+        fields = ('username','email','student_id','gender','user_role','useravatar',)
 
     def clean_email(self):
 
@@ -78,7 +88,6 @@ class UserChangeForm(forms.ModelForm):
     def clean_password(self):
         return self.initial['password']
 
-
 class RegistrationForm(UserCreationForm):
     error_css_class = 'error'
     required_css_class = 'required'
@@ -105,3 +114,38 @@ class RegistrationFormHoneypot(RegistrationForm):
 
     """
     accept_terms = HoneyPotField()
+
+class EditForm(forms.ModelForm):
+
+    username = models.CharField(max_length=30)
+    student_id = models.CharField(max_length=11)
+    gender = models.CharField(max_length=1)
+    user_role = models.CharField(max_length=2)
+    useravatar = models.ImageField(max_length=100),
+
+    class Meta:
+        model = get_user_model()
+        fields = ('username','student_id','gender','user_role','useravatar',)
+
+    def clean_email(self):
+
+        # Since User.email is unique, this check is redundant,
+        # but it sets a nicer error message than the ORM. See #13147.
+        email = self.cleaned_data['email']
+        try:
+            get_user_model()._default_manager.get(email=email)
+        except get_user_model().DoesNotExist:
+            return email
+        raise forms.ValidationError(
+            self.error_messages['duplicate_email'],
+            code='duplicate_email',
+        )
+
+
+    def update(self, commit=True):
+        user = super(UserCreationForm, self).save(commit=False)
+        user.set_password(self.cleaned_data['password1'])
+        user.is_active = not settings.USERS_VERIFY_EMAIL
+        if commit:
+            user.save()
+        return user

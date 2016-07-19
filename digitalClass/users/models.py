@@ -1,3 +1,5 @@
+#!coding:utf8
+from __future__ import unicode_literals
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
@@ -8,31 +10,49 @@ from django.utils.translation import ugettext_lazy as _
 from .conf import settings
 from .managers import UserInheritanceManager, UserManager
 
-# import courses.models as courses_models
-# import comments.models as comments_models
-
 
 class AbstractUser(AbstractBaseUser, PermissionsMixin):
     USERS_AUTO_ACTIVATE = not settings.USERS_VERIFY_EMAIL
 
-    name = models.CharField(max_length=30,unique=True,db_index=True)
     email = models.EmailField(
-        _('email address'), max_length=255, unique=True, db_index=True)
+            _('email address'), max_length=255, unique=True, db_index=True)
     is_staff = models.BooleanField(
-        _('staff status'), default=False,
-        help_text=_('Designates whether the user can log into this admin site.'))
+            _('staff status'), default=False,
+            help_text=_('Designates whether the user can log into this admin site.'))
 
     is_active = models.BooleanField(
-        _('active'), default=USERS_AUTO_ACTIVATE,
-        help_text=_('Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.'))
+            _('active'), default=USERS_AUTO_ACTIVATE,
+            help_text=_('Designates whether this user should be treated as '
+                'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    user_type = models.ForeignKey(ContentType, null=True, editable=False)
+    username = models.CharField(_('用户名'),max_length=30, unique=True, null=True)
+    student_id = models.CharField('学号或工号',max_length=30, unique=True, null=True, blank=True)
+
+    MALE = 'm'
+    FEMALE = 'f'
+    GENDER = ((MALE, '男'),(FEMALE,'女'),)
+    gender = models.CharField('性别',
+            max_length=1,
+            choices=GENDER,
+            default=MALE)
+
+    user_type=models.ForeignKey(ContentType,null=True,editable=False)
+
+    TEACHER='te'
+    TA='ta'
+    STUDENT='st'
+    USER_ROLE=((TEACHER,'老师'),(TA,'助教'),(STUDENT,'学生'),)
+    user_role=models.CharField(
+            '类型',
+            max_length=2,
+            choices=USER_ROLE,
+            default=STUDENT)
+    useravatar = models.ImageField('用户头像',upload_to="avatar",null = True, blank=True)
 
     objects = UserInheritanceManager()
     base_objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
     class Meta:

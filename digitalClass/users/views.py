@@ -23,6 +23,8 @@ if settings.USERS_SPAM_PROTECTION:  # pragma: no cover
 else:
     from .forms import RegistrationForm
 
+from .forms import EditForm
+
 
 @csrf_protect
 @never_cache
@@ -53,6 +55,7 @@ def register(request,
     if request.method == 'POST':
         form = registration_form(request.POST)
         if form.is_valid():
+            # user.useravatar=SaveFile(request.FILES['useravatar'],'avatar/')
             user = form.save()
             if settings.USERS_AUTO_LOGIN_AFTER_REGISTRATION:
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -168,6 +171,49 @@ def activation_complete(request,
     context = {
         'title': _('Activation complete'),
     }
+    if extra_context is not None:  # pragma: no cover
+        context.update(extra_context)
+    return TemplateResponse(request, template_name, context,
+                            current_app=current_app)
+
+# def SaveFile(file,path='',fileName=''):
+#     fileName=file._get_name() if fileName=='' else fileName
+#     filePath=str(path)+str(fileName)
+#     rootFilePath='%s%s' %(settings.MEDIA_ROOT,filePath)
+#     fd=open(rootFilePath,'wb')
+#     for chunk in file.chunks():
+#         fd.write(chunk)
+#     fd.close()
+#     return filePath
+
+def edit(request,template_name='users/edit.html',
+        edit_form=EditForm,
+        extra_context=None,
+        current_app=None):
+    """TODO: Docstring for edit.
+
+    :request: TODO
+    :template_name: TODO
+    :returns: TODO
+
+    """
+    form = edit_form(request.POST)
+    user = request.user
+    if form.is_valid():
+        # user.useravatar=SaveFile(request.FILES['useravatar'],'avatar/')
+        user = request.user
+    else:
+        form = edit_form()
+
+    current_site = get_current_site(request)
+    context = {
+        'form': form,
+        'site': current_site,
+        'site_name': current_site.name,
+        'title': 'Modify personal information',
+        'user_name': user.username
+    }
+
     if extra_context is not None:  # pragma: no cover
         context.update(extra_context)
     return TemplateResponse(request, template_name, context,

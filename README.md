@@ -23,3 +23,4 @@ Our group(see below)'s duty is providing the server technology support for this 
 ## 备注
 1. setting.py里包括模板文件的位置,MySQL数据库的配置，语言和市区的设置
 2. 用户认证(登录，注册，找回密码)都是用Django自带的`contrib.auth`完成的
+

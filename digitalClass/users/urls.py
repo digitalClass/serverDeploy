@@ -6,7 +6,7 @@ from django.contrib.auth.views import (login, logout, password_change,
                                        password_reset_done)
 
 from .views import (activate, activation_complete, register,
-                    registration_closed, registration_complete)
+                    registration_closed, registration_complete,edit)
 
 urlpatterns = [
     url(r'^register/$', register, name='users_register'),
@@ -48,4 +48,7 @@ urlpatterns = [
     url(r'^reset/done/$', password_reset_complete,
         {'template_name': 'users/password_reset_complete.html'},
         name='users_password_reset_complete'),
+    url(r'^edit/$', edit,
+        {'template_name': 'users/edit.html'},
+        name='user_edit'),
 ]

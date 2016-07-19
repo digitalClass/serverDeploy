@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'courses',
     'comments',
+    'digitalClass',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -145,7 +146,7 @@ USERS_EMAIL_CONFIRMATION_TIMEOUT_DAYS = 3
 USERS_PASSWORD_MIN_LENGTH = 6
 USERS_PASSWORD_MAX_LENGTH = None
 USERS_CHECK_PASSWORD_COMPLEXITY=True
-USERS_SPAM_PROTECTION = False
+USERS_SPAM_PROTECTION = True
 USERS_EMAIL_DOMAINS_WHITELIST=['mail.ustc.edu.cn','ustc.edu.cn','test.com','163.com']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -158,3 +159,7 @@ DEFAULT_FROM_EMAIL = 'hzh8311@mail.ustc.edu.cn'
 
 #sending e-mails account
 USERS_CREATE_SUPERUSER = DEBUG
+
+MEDIA_URL = '/ppts/'
+#MEDIA_ROOT = os.path.join(SITE_ROOT,'ppts')
+MEDIA_ROOT = '/home/yunfeng/ppts/'
