@@ -48,4 +48,4 @@ if settings.DEBUG:
         url(r'^course_test/(\d+)/$', courses_views.course_test),
 ]
     urlpatterns += patterns('',
-	(r'^ppts/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))
+	(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))
