@@ -45,6 +45,11 @@ def profile(request,
     return HttpResponse(t.render(c))
 
 def classroom(request, course_id, ppt_title, slice_index):
+	course_id = int(course_id)
+	slice_index= int(slice_index)
+	if slice_index < 0:
+		return HttpResponseRedirect('/404/')
+
 	course  = courses_models.Course.objects.get(id=course_id)
 	ppt_file = courses_models.PPTfile.objects.get(course=course,\
 	title=ppt_title)
@@ -141,7 +146,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 	print('user_data')
 	print(user_data)
 
-	return render_to_response('player.html', {'user_data': user_data, \
+	return render_to_response('player.html', {'logined': request.user.is_authenticated(),'user_data': user_data, \
 	'ppt_slices_data': ppt_slices_data,'course_data':course_data,\
 	'question_data':question_data}, context_instance=RequestContext(request))
 
@@ -280,11 +285,11 @@ def feedback(request):
 		)
 		return HttpResponseRedirect('/thanks/')
 	else:
-		return render_to_response('feedback.html', context_instance= \
+		return render_to_response('feedback.html', {'logined': request.user.is_authenticated()},context_instance= \
 		RequestContext(request))
 
 def thanks(request):
-	return render_to_response('thanks.html')
+	return render_to_response('thanks.html', {'logined': request.user.is_authenticated()})
 
 # why this does not work?
 def create(request):
@@ -302,3 +307,6 @@ def logout_user(request):
 @login_required
 def courses(request):
     return HttpResponseRedirect("CourseList/Chapter01.html")
+
+def page_404(request):
+	return render_to_response('404.html')
