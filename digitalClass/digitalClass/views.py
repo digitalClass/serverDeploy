@@ -20,14 +20,16 @@ from users.models import User
 
 now = datetime.datetime.now()
 def homepage(request):
+    # 不用登陆也能看到课程列表
+    courses = courses_models.Course.objects.all()
     if request.user.is_authenticated():
         username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-        return render_to_response("index.html",{'username':username,'user_id':user_id,'user_role':user_role,})
+        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,"courses":courses})
     else:
-        return render_to_response("index.html")
+        return render_to_response("index.html",{"logined": False,"courses":courses})
 
 @login_required
 def profile(request,
@@ -140,6 +142,48 @@ def classroom(request, course_id, ppt_title, slice_index):
 	print(user_data)
 
 	return render_to_response('player.html', {'user_data': user_data, 'ppt_slices_data': ppt_slices_data,'course_data':course_data,'question_data':question_data}, context_instance=RequestContext(request))
+
+@login_required
+def add_vote(request):
+	now = datetime.datetime.now()
+	if request.method == 'POST':
+		print(request.POST)
+		code = -1
+		msg = '请检查是否登录'
+		new_answer_id = -4
+		user_id = int(request.user.id)
+		question_id = int(request.POST['question_id'])
+		answer_id = int(request.POST['answer_id'])
+		course_id = int(request.POST['course_id'])
+		ppt_file_title = request.POST['ppt_file_title']
+		ppt_slice_id = int(request.POST['ppt_slice_id'])
+
+		curr_user = users_models.User.objects.get(id=user_id)
+
+		#vote on a question
+		if answer_id < 0:
+			curr_question = comments_models.Question.objects.filter(id=question_id)
+			if curr_question == []:
+					msg = '当前的问题不存在'
+			else:
+				curr_question.update(num_vote=curr_question[0].num_vote+1)
+				code = 0
+				msg = ''
+
+		#vote on an answer
+		else:
+			curr_answer= comments_models.Answer.objects.filter(id=answer_id)
+			if curr_answer == []:
+					msg = '当前的回答不存在'
+			else:
+				curr_answer.update(num_vote=curr_answer[0].num_vote+1)
+				code = 0
+				msg = ''
+
+		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':new_answer_id}), content_type="application/json")
+
+	else:
+		return HttpResponse(json.dumps({'code':0, 'msg': '0', 'answer_id' : 0}), content_type="application/json")
 
 @login_required
 def add_comments(request):
