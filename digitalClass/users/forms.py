@@ -28,7 +28,7 @@ class UserCreationForm(forms.ModelForm):
     password2 = PasswordField(
         label=_('重复密码'),
         help_text=_(''))
-    useravatar = models.ImageField(max_length=100),
+    useravatar = models.FileField(),
 
     class Meta:
         model = get_user_model()
