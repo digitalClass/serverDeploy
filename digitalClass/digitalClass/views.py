@@ -20,14 +20,16 @@ from users.models import User
 
 now = datetime.datetime.now()
 def homepage(request):
+    # 不用登陆也能看到课程列表
+    courses = courses_models.Course.objects.all()
     if request.user.is_authenticated():
         username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,})
+        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,"courses":courses})
     else:
-        return render_to_response("index.html",{"logined": False,})
+        return render_to_response("index.html",{"logined": False,"courses":courses})
 
 @login_required
 def profile(request,
