@@ -127,21 +127,6 @@ class EditForm(forms.ModelForm):
         model = get_user_model()
         fields = ('username','student_id','gender','user_role','useravatar',)
 
-    def clean_email(self):
-
-        # Since User.email is unique, this check is redundant,
-        # but it sets a nicer error message than the ORM. See #13147.
-        email = self.cleaned_data['email']
-        try:
-            get_user_model()._default_manager.get(email=email)
-        except get_user_model().DoesNotExist:
-            return email
-        raise forms.ValidationError(
-            self.error_messages['duplicate_email'],
-            code='duplicate_email',
-        )
-
-
     def update(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
         user.set_password(self.cleaned_data['password1'])

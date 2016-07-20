@@ -26,7 +26,7 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
                 'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     username = models.CharField(_('用户名'),max_length=30, unique=True, null=True)
-    student_id = models.CharField('学号或工号',max_length=30, unique=True, null=True, blank=True)
+    student_id = models.CharField('学号或工号',max_length=30, null=True, blank=True)
 
     MALE = 'm'
     FEMALE = 'f'
