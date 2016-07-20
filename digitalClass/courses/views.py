@@ -67,19 +67,46 @@ def create_course(request):
 	    if request.method == 'POST':
 		form = CreateCourseForm(request.POST)
 		if form.is_valid():
-		    print "form is ",form.is_valid()
 		    f = form.cleaned_data
 		    now = datetime.datetime.now()
 		    img = ''
 		    user_id = request.user.id
-		    c = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
+		    course = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
 		    u = User.objects.get(id=user_id)
-		    c.teacher.add(u)
+		    course.teacher.add(u)
 		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
 		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
     	    return render_to_response('create.html',{'form':form},context_instance=RequestContext(request))
     return render_to_response("premissionDeniey.html")
+
+@login_required
+def course_edit(request, c_id):
+    try:
+	course_id = int(c_id)
+    except ValueError:
+	raise HttpResponse('Please input correct CourseID ')
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+	return HttpResponse('Course does not exist')
+    if request.user.is_authenticated():
+	teacher = course.teacher.filter(id = request.user.id)
+	if teacher:
+	    if request.method == 'POST':
+		form = EditCourseForm(request.POST)
+		if form.is_valid():
+		    f = form.cleaned_data
+		    course.title = f['course_title']
+		    course.introduce = f['course_data']
+		    course.course_id = f['course_id']
+		    course.save()
+		    return HttpResponseRedirect('/accounts/profile/')
+	    else:
+		form = EditCourseForm({'course_title':course.title, 'course_id':course.course_id, 'course_data':course.introduce})
+    	    return render_to_response('create.html',{'form':form},context_instance=RequestContext(request))
+    return HttpResponse('You aren\'t not the teacher of this course, you can\'t edit its infomation!')
+
 
 def course_page(request, c_id):
     #course page
@@ -108,9 +135,9 @@ def course_page(request, c_id):
 	if s:
 	    Is_subscribed = True
         if request.method == 'POST':
-	    if request.POST.subscribed_status_changed:
+	    if request.POST['subscribed_status_changed']==u'True':
 		if Is_subscribed:
-		    course.subscribed_user.delete()
+		    course.subscribed_user.remove(request.user)
 		    Is_subscribed = False
 		else:
 		    course.subscribed_user.add(request.user)

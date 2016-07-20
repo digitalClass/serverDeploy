@@ -42,6 +42,7 @@ urlpatterns += [
     url(r'^course/(\d+)/$', courses_views.course_page),
     url(r'^accounts/profile/$', courses_views.profile),
     url(r'^course/(\d+)/ppt_upload/$', courses_views.ppt_upload),
+    url(r'^course/(\d+)/edit/$', courses_views.course_edit),
 ]
 if settings.DEBUG:
     # static files (images, css, javascript, etc.)
