@@ -153,9 +153,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS=False
 EMAIL_HOST='mail.ustc.edu.cn'
 EMIAL_PORT=25
-EMAIL_HOST_USER='hzh8311@mail.ustc.edu.cn'
-EMAIL_HOST_PASSWORD='h8062803~~'
-DEFAULT_FROM_EMAIL = 'hzh8311@mail.ustc.edu.cn'
+EMAIL_HOST_USER='digital_class@163.com'
+EMAIL_HOST_PASSWORD='h123456'
+DEFAULT_FROM_EMAIL = 'digital_class@163.com'
 
 #sending e-mails account
 USERS_CREATE_SUPERUSER = DEBUG
