@@ -150,11 +150,11 @@ USERS_SPAM_PROTECTION = True
 USERS_EMAIL_DOMAINS_WHITELIST=['mail.ustc.edu.cn','ustc.edu.cn','test.com','163.com']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS=False
-EMAIL_HOST='mail.ustc.edu.cn'
-EMIAL_PORT=25
+EMAIL_USE_TLS=True
+EMAIL_HOST='smtp.163.com'
+EMIAL_PORT=465
 EMAIL_HOST_USER='digital_class@163.com'
-EMAIL_HOST_PASSWORD='h123456'
+EMAIL_HOST_PASSWORD='h1234567'
 DEFAULT_FROM_EMAIL = 'digital_class@163.com'
 
 #sending e-mails account
