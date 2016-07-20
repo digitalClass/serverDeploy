@@ -46,8 +46,10 @@ def profile(request,
 
 def classroom(request, course_id, ppt_title, slice_index):
 	course  = courses_models.Course.objects.get(id=course_id)
-	ppt_file = courses_models.PPTfile.objects.get(course=course, title=ppt_title)
-	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_index)
+	ppt_file = courses_models.PPTfile.objects.get(course=course,\
+	title=ppt_title)
+	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file,\
+	index=slice_index)
 
 #	ppt_slices_data = []
 	for slice in ppt_slices:
@@ -139,7 +141,9 @@ def classroom(request, course_id, ppt_title, slice_index):
 	print('user_data')
 	print(user_data)
 
-	return render_to_response('player.html', {'user_data': user_data, 'ppt_slices_data': ppt_slices_data,'course_data':course_data,'question_data':question_data}, context_instance=RequestContext(request))
+	return render_to_response('player.html', {'user_data': user_data, \
+	'ppt_slices_data': ppt_slices_data,'course_data':course_data,\
+	'question_data':question_data}, context_instance=RequestContext(request))
 
 @login_required
 def add_vote(request):
@@ -178,10 +182,12 @@ def add_vote(request):
 				code = 0
 				msg = ''
 
-		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':new_answer_id}), content_type="application/json")
+		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':\
+		new_answer_id}), content_type="application/json")
 
 	else:
-		return HttpResponse(json.dumps({'code':0, 'msg': '0', 'answer_id' : 0}), content_type="application/json")
+		return HttpResponse(json.dumps({'code':0, 'msg': '0', 'answer_id' : 0}),\
+		content_type="application/json")
 
 @login_required
 def add_comments(request):
@@ -206,7 +212,8 @@ def add_comments(request):
 			course = courses_models.Course.objects.get(id=course_id)
 			ppt_file = courses_models.PPTfile.objects.get(course=course, \
 			title=ppt_file_title)
-			ppt_slice = courses_models.PPTslice.objects.get(pptfile=ppt_file, index=ppt_slice_id)
+			ppt_slice = courses_models.PPTslice.objects.get(pptfile=ppt_file, \
+			index=ppt_slice_id)
 
 			new_question = comments_models.Question(date=now, user=request.user,\
 			course=course,ppt_file=ppt_file, ppt_slice=ppt_slice, content=content,\
@@ -248,10 +255,12 @@ def add_comments(request):
 			code = 0
 			msg = ''
 
-		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':new_answer_id}), content_type="application/json")
+		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
+		'answer_id':new_answer_id}), content_type="application/json")
 
 	else:
-		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
+		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
+		"application/json")
 
 def feedback(request):
 	if request.method == "POST":
@@ -271,7 +280,8 @@ def feedback(request):
 		)
 		return HttpResponseRedirect('/thanks/')
 	else:
-		return render_to_response('feedback.html', context_instance=RequestContext(request))
+		return render_to_response('feedback.html', context_instance= \
+		RequestContext(request))
 
 def thanks(request):
 	return render_to_response('thanks.html')
