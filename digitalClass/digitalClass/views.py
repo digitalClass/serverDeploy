@@ -25,9 +25,9 @@ def homepage(request):
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-        return render_to_response("index.html",{'username':username,'user_id':user_id,'user_role':user_role,})
+        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,})
     else:
-        return render_to_response("index.html")
+        return render_to_response("index.html",{"logined": False,})
 
 @login_required
 def profile(request,
@@ -159,7 +159,7 @@ def add_vote(request):
 		course_id = int(request.POST['course_id'])
 		ppt_file_title = request.POST['ppt_file_title']
 		ppt_slice_id = int(request.POST['ppt_slice_id'])
-		
+
 		curr_user = users_models.User.objects.get(id=user_id)
 
 		#vote on a question
@@ -172,7 +172,7 @@ def add_vote(request):
 				code = 0
 				msg = ''
 
-		#vote on an answer 
+		#vote on an answer
 		else:
 			curr_answer= comments_models.Answer.objects.filter(id=answer_id)
 			if curr_answer == []:
@@ -204,7 +204,7 @@ def add_comments(request):
 		course_id = int(request.POST['course_id'])
 		ppt_file_title = request.POST['ppt_file_title']
 		ppt_slice_id = int(request.POST['ppt_slice_id'])
-		
+
 		curr_user = users_models.User.objects.get(id=user_id)
 
 		#create a question
@@ -222,7 +222,7 @@ def add_comments(request):
 			code = 0
 			msg = ''
 
-		#create an answer 
+		#create an answer
 		elif answer_id == -2:
 			course = courses_models.Course.objects.get(id=course_id)
 			question = comments_models.Question.objects.get(id=question_id)
@@ -245,7 +245,7 @@ def add_comments(request):
 			code = 0
 			msg = ''
 
-		#comment on an answer 
+		#comment on an answer
 		elif answer_id >= 0:
 			curr_answer = comments_models.Answer.objects.get(id=answer_id)
 			new_ac = comments_models.Answer_Comment( \
