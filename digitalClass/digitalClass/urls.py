@@ -16,24 +16,25 @@ Including another URLconf
 from django.conf.urls import url,include
 from django.contrib import admin
 from django.contrib.auth import urls
-from digitalClass.views import *
+from digitalClass import views as digitalClass_views
 from django.conf import settings
 from django.conf.urls import patterns
 from courses import views as courses_views
 from django.views.static import serve
 
 urlpatterns = [
-    url(r'^$', homepage),
+    url(r'^$', digitalClass_views.homepage),
     url(r'^admin/', admin.site.urls),
 # app users
-    url(r'^accounts/logout$',logout_user),
+    url(r'^accounts/logout$',digitalClass_views.logout_user),
     url(r'^accounts/', include('users.urls')),
     #url(r'^accounts/profile/$', profile),
     #url(r'^create/$', create, name="create_course"),
-    url(r'^addcomments/$', add_comments),
-    url(r'^feedback/$', feedback),
-    url(r'^thanks/$', thanks),
-    url(r'^classroom/(\d+)/(\w+)/(\d+)/$',classroom),
+    url(r'^addcomments/$', digitalClass_views.add_comments),
+    url(r'^feedback/$', digitalClass_views.feedback),
+    url(r'^thanks/$', digitalClass_views.thanks),
+    url(r'^classroom/(\d+)/(\w+)/(\d+)/$',digitalClass_views.classroom),
+    url(r'^addvote/$', digitalClass_views.add_vote),
 ]
 
 urlpatterns += [
@@ -48,4 +49,4 @@ if settings.DEBUG:
         url(r'^course_test/(\d+)/$', courses_views.course_test),
 ]
     urlpatterns += patterns('',
-	(r'^ppts/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))
+	(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))
