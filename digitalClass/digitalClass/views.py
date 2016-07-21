@@ -47,10 +47,16 @@ def profile(request,
     return HttpResponse(t.render(c))
 
 def classroom(request, course_id, ppt_title, slice_index):
-	course  = courses_models.Course.objects.get(id=course_id)
-	ppt_file = courses_models.PPTfile.objects.get(course=course, title=ppt_title)
-	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file, index=slice_index)
+	course_id = int(course_id)
+	slice_index= int(slice_index)
+	if slice_index < 0:
+		return HttpResponseRedirect('/404/')
 
+	course  = courses_models.Course.objects.get(id=course_id)
+	ppt_file = courses_models.PPTfile.objects.get(course=course,\
+	title=ppt_title)
+	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file,\
+	index=slice_index)
 #	ppt_slices_data = []
 	for slice in ppt_slices:
 		ps_data = {}
@@ -141,7 +147,9 @@ def classroom(request, course_id, ppt_title, slice_index):
 	print('user_data')
 	print(user_data)
 
-	return render_to_response('player.html', {'user_data': user_data, 'ppt_slices_data': ppt_slices_data,'course_data':course_data,'question_data':question_data}, context_instance=RequestContext(request))
+	return render_to_response('player.html', {'logined': request.user.is_authenticated(),'user_data': user_data, \
+	'ppt_slices_data': ppt_slices_data,'course_data':course_data,\
+	'question_data':question_data}, context_instance=RequestContext(request))
 
 @login_required
 def add_vote(request):
@@ -180,10 +188,12 @@ def add_vote(request):
 				code = 0
 				msg = ''
 
-		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':new_answer_id}), content_type="application/json")
+		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':\
+		new_answer_id}), content_type="application/json")
 
 	else:
-		return HttpResponse(json.dumps({'code':0, 'msg': '0', 'answer_id' : 0}), content_type="application/json")
+		return HttpResponse(json.dumps({'code':0, 'msg': '0', 'answer_id' : 0}),\
+		content_type="application/json")
 
 @login_required
 def add_comments(request):
@@ -208,9 +218,10 @@ def add_comments(request):
 			course = courses_models.Course.objects.get(id=course_id)
 			ppt_file = courses_models.PPTfile.objects.get(course=course, \
 			title=ppt_file_title)
-			ppt_slice = courses_models.PPTslice.objects.get(pptfile=ppt_file, index=ppt_slice_id)
+			ppt_slice = courses_models.PPTslice.objects.get(pptfile=ppt_file, \
+			index=ppt_slice_id)
 
-			new_question = comments_models.Question(date=now, user=request.user,\
+			new_question = comments_models.question(date=now, user=request.user,\
 			course=course,ppt_file=ppt_file, ppt_slice=ppt_slice, content=content,\
 			num_vote = 0)
 			new_question.save()
@@ -219,10 +230,10 @@ def add_comments(request):
 
 		#create an answer
 		elif answer_id == -2:
-			course = courses_models.Course.objects.get(id=course_id)
-			question = comments_models.Question.objects.get(id=question_id)
-#			curr_user_role = .Answer.objects.get(id=comment_id)
-			new_answer= comments_models.Answer(date=now, user=request.user,\
+			course = courses_models.course.objects.get(id=course_id)
+			question = comments_models.question.objects.get(id=question_id)
+#			curr_user_role = .answer.objects.get(id=comment_id)
+			new_answer= comments_models.answer(date=now, user=request.user,\
 			course=course, question=question, user_role=request.user.user_role,\
 			content=content, num_vote=0)
 			new_answer.save()
@@ -232,8 +243,8 @@ def add_comments(request):
 
 		#comment on a quesiton
 		elif answer_id == -1:
-			curr_question = comments_models.Question.objects.get(id=question_id)
-			new_qc = comments_models.Question_Comment( \
+			curr_question = comments_models.question.objects.get(id=question_id)
+			new_qc = comments_models.question_comment( \
 			date = datetime.datetime.now(),\
 			question = curr_question, user = curr_user, content=content)
 			new_qc.save()
@@ -242,42 +253,45 @@ def add_comments(request):
 
 		#comment on an answer
 		elif answer_id >= 0:
-			curr_answer = comments_models.Answer.objects.get(id=answer_id)
-			new_ac = comments_models.Answer_Comment( \
+			curr_answer = comments_models.answer.objects.get(id=answer_id)
+			new_ac = comments_models.answer_comment( \
 			date = datetime.datetime.now(),\
 			answer = curr_answer, user = curr_user, content=content)
 			new_ac.save()
 			code = 0
 			msg = ''
 
-		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':new_answer_id}), content_type="application/json")
+		return httpresponse(json.dumps({'code':code, 'msg': msg,\
+		'answer_id':new_answer_id}), content_type="application/json")
 
 	else:
-		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type="application/json")
+		return httpresponse(json.dumps({'code':0, 'msg': ''}), content_type= \
+		"application/json")
+
 
 def feedback(request):
-	if request.method == "POST":
+	if request.method == "post":
 		user = request.user
 		if user.is_anonymous():
-			user = None
+			user = none
 		date = datetime.datetime.now()
-		content = request.POST['content']
-		feedback = digital_models.Feedback(date=date, user=user, content=content)
+		content = request.post['content']
+		feedback = digital_models.feedback(date=date, user=user, content=content)
 		feedback.save()
 		send_mail(
 			'feedback',
 			content,
-			None,
+			none,
 			['ustcfighters@126.com'],
-			fail_silently=False
+			fail_silently=false
 		)
-		return HttpResponseRedirect('/thanks/')
+		return httpresponseredirect('/thanks/')
 	else:
-		return render_to_response('feedback.html', context_instance=RequestContext(request))
+		return render_to_response('feedback.html', {'logined': request.user.is_authenticated()},context_instance= \
+		requestcontext(request))
 
 def thanks(request):
-	return render_to_response('thanks.html')
-
+	return render_to_response('thanks.html', {'logined': request.user.is_authenticated()})
 # why this does not work?
 def create(request):
     if request.user.user_role=="st":
@@ -294,3 +308,6 @@ def logout_user(request):
 @login_required
 def courses(request):
     return HttpResponseRedirect("CourseList/Chapter01.html")
+
+def page_404(request):
+	return render_to_response('404.html')

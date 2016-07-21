@@ -61,7 +61,11 @@ ROOT_URLCONF = 'digitalClass.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+<<<<<<< HEAD
+        'DIRS': ['digitalClass/web_page/templates','digitalClass/web_page/templates/errors'],
+=======
         'DIRS': ['digitalClass/web_page/templates'],
+>>>>>>> 4ca5aa856b0d65eb3e3e02970591b6f396584841
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
