@@ -199,6 +199,15 @@ def ppt_upload(request,c_id):
     #uploaded_list = []
     #how to upload more than one file
     #where to redirect when uploaded
+    try:
+        course_id = int(c_id)
+    except ValueError:
+        raise Http404()
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return HttpResponse('Course does not exist')
+
     logined = False
     if request.user.is_authenticated():
         logined = True
@@ -206,28 +215,39 @@ def ppt_upload(request,c_id):
 	    if request.method == 'POST':
 		form = UploadPPTForm(request.POST,request.FILES)
 		if form.is_valid():
-		    handle_upload_file(request.FILES['file'])
+		    f = form.cleaned_data
+		    ppt_title = f['title']
+		    upload_file = request.FILES['file']
+		    If_ppt_existed = course.pptfile_set.filter(title=ppt_title)
+		    if If_ppt_existed:
+			return HttpResponse("A same named PPT has existed in this course!")
+		    fname = handle_upload_file(upload_file,course_id,ppt_title)
+		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],course_id=course_id)
 		    #return render_to_response()
-		    return HttpResponse("Successful.html")
+		    #return HttpResponse(fname)
+		    if fname:
+		        return HttpResponse("Successful.html")
 	    else:
 		form = UploadPPTForm()
             return render_to_response('test_course/ppt_upload.html',{'form':form,'logined':logined,'user_name':request.user.username}, context_instance=RequestContext(request))
     return render_to_response("premissionDeniey.html",{'logined':logined,'user_name':request.user.username})
 
-def handle_upload_file(f):
+def handle_upload_file(f,course_id,title):
     file_name=""
     try:
-	path = "media/editor" + time.strftime('/%Y/%m/%d/%H/%M/%S/')
-	if not os.path.exist(path):
+	#path = "media/editor" + datetime.time.strftime('/%Y/%m/%d/%H/%M/%S/')
+	path = "media/digitalClass/ppts/%d/%s/"%(course_id,title)
+	if not os.path.exists(path):
 	    os.makedirs(path)
-	    file_name = path + f.name
-	    destination = open(file_name,'wb+')
-	    for chunk in f.chunks():
-		destination.write(chunk)
+	file_name = path + f.name
+	destination = open(file_name,'wb+')
+	for chunk in f.chunks():
+	    destination.write(chunk)
 	    destination.close()
     except Exception, e:
 	print e
-    return file_name
+    #return path
+    return file_name 
 
 
 

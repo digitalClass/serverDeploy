@@ -48,6 +48,7 @@ if settings.DEBUG:
     # static files (images, css, javascript, etc.)
     urlpatterns += [
         url(r'^course_test/(\d+)/$', courses_views.course_test),
+        url(r'^course_test/(\d+)/ppt_upload$', courses_views.ppt_upload),
 ]
     urlpatterns += patterns('',
 	(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}))
