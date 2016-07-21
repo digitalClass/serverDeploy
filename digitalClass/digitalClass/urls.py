@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^addcomments/$', digitalClass_views.add_comments),
     url(r'^feedback/$', digitalClass_views.feedback),
     url(r'^thanks/$', digitalClass_views.thanks),
-    url(r'^classroom/(\w+)/(\w+)/(\w+)/$',digitalClass_views.classroom),
+    url(r'^classroom/(\w+)/(\w+)/(\-{0,1}\w+)/$',digitalClass_views.classroom),
     url(r'^addvote/$', digitalClass_views.add_vote),
 ]
 

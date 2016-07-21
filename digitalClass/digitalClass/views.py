@@ -47,8 +47,11 @@ def profile(request,
     return HttpResponse(t.render(c))
 
 def classroom(request, course_id, ppt_title, slice_index):
-	course_id = int(course_id)
-	slice_index= int(slice_index)
+	try:
+		course_id = int(course_id)
+		slice_index= int(slice_index)
+	except ValueError:
+		return HttpResponseRedirect('/404/')
 	if slice_index < 0:
 		return HttpResponseRedirect('/404/')
 
