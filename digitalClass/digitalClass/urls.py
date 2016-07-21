@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^addcomments/$', digitalClass_views.add_comments),
     url(r'^feedback/$', digitalClass_views.feedback),
     url(r'^thanks/$', digitalClass_views.thanks),
-    url(r'^classroom/(\d+)/(\w+)/(\d+)/$',digitalClass_views.classroom),
+    url(r'^classroom/(\w+)/(\w+)/(\-{0,1}\w+)/$',digitalClass_views.classroom),
     url(r'^addvote/$', digitalClass_views.add_vote),
 ]
 
@@ -44,6 +44,12 @@ urlpatterns += [
     url(r'^course/(\d+)/ppt_upload/$', courses_views.ppt_upload),
     url(r'^course/(\d+)/edit/$', courses_views.course_edit),
 ]
+
+#error routes
+urlpatterns += [
+    url(r'^404/$', digitalClass_views.page_404),
+]
+
 if settings.DEBUG:
     # static files (images, css, javascript, etc.)
     urlpatterns += [
