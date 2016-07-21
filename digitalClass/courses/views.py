@@ -6,6 +6,7 @@ from courses.models import Course, PPTfile, PPTslice
 from users.models import User
 from form import *
 from django.template import RequestContext
+from digitalClass.utils import *
 import os
 
 import datetime
@@ -222,6 +223,7 @@ def ppt_upload(request,c_id):
 		    if If_ppt_existed:
 			return HttpResponse("A same named PPT has existed in this course!")
 		    fname = handle_upload_file(upload_file,course_id,ppt_title)
+		    split_pdf(fname)
 		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],course_id=course_id)
 		    #return render_to_response()
 		    #return HttpResponse(fname)
