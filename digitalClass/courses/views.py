@@ -23,7 +23,9 @@ def profile(request):
     #a teaching assistant
     #a student
     #not authenticated->redirect to somewhere
+    logined =False
     if request.user.is_authenticated():
+        logined = True
         user_email = request.user.email
         user_name = request.user.username
         user_id = request.user.id
@@ -43,7 +45,7 @@ def profile(request):
 	else:
 	    #Student's profile
 	    course_list = user.subscribed_user.all()
-	return render_to_response('users/profile.html',{"user_name":user_name,"user_id":user_id,"user_role":user_role,"useravatar":useravatar, "course_list":course_list})
+        return render_to_response('users/profile.html',{"logined":logined,"user_name":user_name,"user_id":user_id,"user_role":user_role,"useravatar":useravatar, "course_list":course_list})
     return render_to_response("premissionDeniey.html")
 
 @login_required
@@ -62,7 +64,9 @@ def create_course(request):
 	#Course.save()
 	#add Course.teacher
     #else -> redirect
+    logined = False
     if request.user.is_authenticated():
+        logined = True
 	if request.user.user_role == 'te':
 	    if request.method == 'POST':
 		form = CreateCourseForm(request.POST)
@@ -77,7 +81,7 @@ def create_course(request):
 		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
 		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
-    	    return render_to_response('create.html',{'form':form},context_instance=RequestContext(request))
+            return render_to_response('create.html',{'form':form,"logined":logined,"user_name":request.user.username},context_instance=RequestContext(request))
     return render_to_response("premissionDeniey.html")
 
 @login_required
@@ -111,7 +115,7 @@ def course_edit(request, c_id):
 def course_page(request, c_id):
     #course page
     #courses' information,ppt list are needed
-    #Is_this_course_teacher 
+    #Is_this_course_teacher
     try:
 	course_id = int(c_id)
     except ValueError:
@@ -123,8 +127,10 @@ def course_page(request, c_id):
     ppts = course.pptfile_set.all()
     Is_this_course_teacher = False
     Is_subscribed = False
-    
+
+    logined = False
     if request.user.is_authenticated():
+        logined = True
 	user_id = request.user.id
 	u = course.teacher.filter(id=user_id)
 	if u:
@@ -143,12 +149,13 @@ def course_page(request, c_id):
     else:
 	if request.method == 'POST':
 	    return HttpResponseRedirect('/accounts/login/')
-    return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed},context_instance=RequestContext(request))
+    return render_to_response('course.html',{'logined':logined,'user_name':request.user.username,'user_role':request.user.user_role,'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed},context_instance=RequestContext(request))
+    #return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed})
 
 def course_test(request, c_id):
     #course page
     #courses' information,ppt list are needed
-    #Is_this_course_teacher 
+    #Is_this_course_teacher
     try:
 	course_id = int(c_id)
     except ValueError:
@@ -160,7 +167,7 @@ def course_test(request, c_id):
     ppts = course.pptfile_set.all()
     Is_this_course_teacher = False
     Is_subscribed = False
-    
+
     if request.user.is_authenticated():
 	user_id = request.user.id
 	u = course.teacher.filter(id=user_id)
@@ -192,7 +199,9 @@ def ppt_upload(request,c_id):
     #uploaded_list = []
     #how to upload more than one file
     #where to redirect when uploaded
+    logined = False
     if request.user.is_authenticated():
+        logined = True
 	if request.user.user_role == 'te':
 	    if request.method == 'POST':
 		form = UploadPPTForm(request.POST,request.FILES)
@@ -202,8 +211,8 @@ def ppt_upload(request,c_id):
 		    return HttpResponse("Successful.html")
 	    else:
 		form = UploadPPTForm()
-	    return render_to_response('test_course/ppt_upload.html',{'form':form}, context_instance=RequestContext(request))
-    return render_to_response("premissionDeniey.html")
+            return render_to_response('test_course/ppt_upload.html',{'form':form,'logined':logined,'user_name':request.user.username}, context_instance=RequestContext(request))
+    return render_to_response("premissionDeniey.html",{'logined':logined,'user_name':request.user.username})
 
 def handle_upload_file(f):
     file_name=""

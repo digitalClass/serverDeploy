@@ -53,7 +53,7 @@ def register(request,
         post_registration_redirect = reverse('users_registration_complete')
 
     if request.method == 'POST':
-        form = registration_form(request.POST)
+        form = registration_form(request.POST,request.FILES)
         if form.is_valid():
             # user.useravatar=SaveFile(request.FILES['useravatar'],'avatar/')
             user = form.save()
