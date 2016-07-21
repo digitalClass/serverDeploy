@@ -1,0 +1,7 @@
+*.pyc
+*.swp
+db.sqlite3
+books
+web_page
+build
+
