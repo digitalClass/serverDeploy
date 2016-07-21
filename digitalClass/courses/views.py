@@ -146,11 +146,11 @@ def course_page(request, c_id):
 		else:
 		    course.subscribed_user.add(request.user)
 		    Is_subscribed = True
+        return render_to_response('course.html',{'logined':logined,'user_name':request.user.username,'user_role':request.user.user_role,'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed},context_instance=RequestContext(request))
     else:
 	if request.method == 'POST':
 	    return HttpResponseRedirect('/accounts/login/')
-    return render_to_response('course.html',{'logined':logined,'user_name':request.user.username,'user_role':request.user.user_role,'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed},context_instance=RequestContext(request))
-    #return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed})
+    return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed})
 
 def course_test(request, c_id):
     #course page
