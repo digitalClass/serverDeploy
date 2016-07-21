@@ -61,7 +61,11 @@ ROOT_URLCONF = 'digitalClass.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+<<<<<<< HEAD
         'DIRS': ['digitalClass/web_page/templates','digitalClass/web_page/templates/errors'],
+=======
+        'DIRS': ['digitalClass/web_page/templates'],
+>>>>>>> 4ca5aa856b0d65eb3e3e02970591b6f396584841
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -150,9 +154,9 @@ USERS_SPAM_PROTECTION = True
 USERS_EMAIL_DOMAINS_WHITELIST=['mail.ustc.edu.cn','ustc.edu.cn','test.com','163.com']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS=False
-EMAIL_HOST='mail.ustc.edu.cn'
-EMIAL_PORT=25
+EMAIL_USE_TLS=True
+EMAIL_HOST='smtp.163.com'
+EMIAL_PORT=465
 EMAIL_HOST_USER='digital_class@163.com'
 EMAIL_HOST_PASSWORD='h1234567'
 DEFAULT_FROM_EMAIL = 'digital_class@163.com'

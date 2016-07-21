@@ -20,14 +20,16 @@ from users.models import User
 
 now = datetime.datetime.now()
 def homepage(request):
+    # 不用登陆也能看到课程列表
+    courses = courses_models.Course.objects.all()
     if request.user.is_authenticated():
         username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,})
+        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,"courses":courses})
     else:
-        return render_to_response("index.html",{"logined": False,})
+        return render_to_response("index.html",{"logined": False,"courses":courses})
 
 @login_required
 def profile(request,
@@ -55,7 +57,6 @@ def classroom(request, course_id, ppt_title, slice_index):
 	title=ppt_title)
 	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file,\
 	index=slice_index)
-
 #	ppt_slices_data = []
 	for slice in ppt_slices:
 		ps_data = {}
@@ -220,7 +221,7 @@ def add_comments(request):
 			ppt_slice = courses_models.PPTslice.objects.get(pptfile=ppt_file, \
 			index=ppt_slice_id)
 
-			new_question = comments_models.Question(date=now, user=request.user,\
+			new_question = comments_models.question(date=now, user=request.user,\
 			course=course,ppt_file=ppt_file, ppt_slice=ppt_slice, content=content,\
 			num_vote = 0)
 			new_question.save()
@@ -229,10 +230,10 @@ def add_comments(request):
 
 		#create an answer
 		elif answer_id == -2:
-			course = courses_models.Course.objects.get(id=course_id)
-			question = comments_models.Question.objects.get(id=question_id)
-#			curr_user_role = .Answer.objects.get(id=comment_id)
-			new_answer= comments_models.Answer(date=now, user=request.user,\
+			course = courses_models.course.objects.get(id=course_id)
+			question = comments_models.question.objects.get(id=question_id)
+#			curr_user_role = .answer.objects.get(id=comment_id)
+			new_answer= comments_models.answer(date=now, user=request.user,\
 			course=course, question=question, user_role=request.user.user_role,\
 			content=content, num_vote=0)
 			new_answer.save()
@@ -242,8 +243,8 @@ def add_comments(request):
 
 		#comment on a quesiton
 		elif answer_id == -1:
-			curr_question = comments_models.Question.objects.get(id=question_id)
-			new_qc = comments_models.Question_Comment( \
+			curr_question = comments_models.question.objects.get(id=question_id)
+			new_qc = comments_models.question_comment( \
 			date = datetime.datetime.now(),\
 			question = curr_question, user = curr_user, content=content)
 			new_qc.save()
@@ -252,45 +253,45 @@ def add_comments(request):
 
 		#comment on an answer
 		elif answer_id >= 0:
-			curr_answer = comments_models.Answer.objects.get(id=answer_id)
-			new_ac = comments_models.Answer_Comment( \
+			curr_answer = comments_models.answer.objects.get(id=answer_id)
+			new_ac = comments_models.answer_comment( \
 			date = datetime.datetime.now(),\
 			answer = curr_answer, user = curr_user, content=content)
 			new_ac.save()
 			code = 0
 			msg = ''
 
-		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
+		return httpresponse(json.dumps({'code':code, 'msg': msg,\
 		'answer_id':new_answer_id}), content_type="application/json")
 
 	else:
-		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
+		return httpresponse(json.dumps({'code':0, 'msg': ''}), content_type= \
 		"application/json")
 
+
 def feedback(request):
-	if request.method == "POST":
+	if request.method == "post":
 		user = request.user
 		if user.is_anonymous():
-			user = None
+			user = none
 		date = datetime.datetime.now()
-		content = request.POST['content']
-		feedback = digital_models.Feedback(date=date, user=user, content=content)
+		content = request.post['content']
+		feedback = digital_models.feedback(date=date, user=user, content=content)
 		feedback.save()
 		send_mail(
 			'feedback',
 			content,
-			None,
+			none,
 			['ustcfighters@126.com'],
-			fail_silently=False
+			fail_silently=false
 		)
-		return HttpResponseRedirect('/thanks/')
+		return httpresponseredirect('/thanks/')
 	else:
 		return render_to_response('feedback.html', {'logined': request.user.is_authenticated()},context_instance= \
-		RequestContext(request))
+		requestcontext(request))
 
 def thanks(request):
 	return render_to_response('thanks.html', {'logined': request.user.is_authenticated()})
-
 # why this does not work?
 def create(request):
     if request.user.user_role=="st":
