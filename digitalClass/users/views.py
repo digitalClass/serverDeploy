@@ -17,6 +17,8 @@ try:
 except ImportError:  # pragma: no cover
     from django.contrib.sites.models import get_current_site
 
+from .models import User
+
 
 if settings.USERS_SPAM_PROTECTION:  # pragma: no cover
     from .forms import RegistrationFormHoneypot as RegistrationForm
@@ -186,6 +188,7 @@ def activation_complete(request,
 #     fd.close()
 #     return filePath
 
+@csrf_protect
 def edit(request,template_name='users/edit.html',
         edit_form=EditForm,
         extra_context=None,
@@ -197,21 +200,29 @@ def edit(request,template_name='users/edit.html',
     :returns: TODO
 
     """
-    form = edit_form(request.POST)
-    user = request.user
-    if form.is_valid():
-        # user.useravatar=SaveFile(request.FILES['useravatar'],'avatar/')
-        user = request.user
+    u = User.objects.get(id=request.user.id)
+    if request.method == 'POST':
+        form = edit_form(request.POST, request.FILES, instance=u)
+        if form.is_valid():
+            form.save()
+            return redirect("../profile/")
     else:
-        form = edit_form()
+        INITIAL={'username':u.username,
+                'student_id':u.student_id,
+                'gender':u.gender,
+                'user_role':u.user_role,
+                'useravatar':u.useravatar,}
+        form = edit_form(initial=INITIAL)
 
     current_site = get_current_site(request)
     context = {
+        'logined': True,
         'form': form,
         'site': current_site,
         'site_name': current_site.name,
         'title': 'Modify personal information',
-        'user_name': user.username
+        'user_name': request.user.username,
+        'useravatar': request.user.useravatar
     }
 
     if extra_context is not None:  # pragma: no cover
