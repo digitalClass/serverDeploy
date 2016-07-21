@@ -217,14 +217,17 @@ def ppt_upload(request,c_id):
 def handle_upload_file(f):
     file_name=""
     try:
-	path = "media/editor" + time.strftime('/%Y/%m/%d/%H/%M/%S/')
-	if not os.path.exist(path):
+	path = "/media/digitalClass/course/" + datetime.datetime.now().strftime("%y-%m-%d-%h-%M-%s")+"/"
+        print path
+	if not os.path.exists(path):
 	    os.makedirs(path)
 	    file_name = path + f.name
+            print file_name
 	    destination = open(file_name,'wb+')
 	    for chunk in f.chunks():
 		destination.write(chunk)
 	    destination.close()
+            print "save done"
     except Exception, e:
 	print e
     return file_name
