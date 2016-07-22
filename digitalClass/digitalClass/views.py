@@ -52,14 +52,26 @@ def classroom(request, course_id, ppt_title, slice_index):
 		slice_index= int(slice_index)
 	except ValueError:
 		return HttpResponseRedirect('/404/')
-	if slice_index < 0:
+	if slice_index <= 0:
 		return HttpResponseRedirect('/404/')
 
-	course  = courses_models.Course.objects.get(id=course_id)
-	ppt_file = courses_models.PPTfile.objects.get(course=course,\
-	title=ppt_title)
-	ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file,\
-	index=slice_index)
+	course = []
+	ppt_file = []
+	ppt_slices = []
+	questions =  []
+	ppt_slices_data = []
+	course_data = []
+	question_data = []
+	ppt_total_page = 0
+	try:
+		course  = courses_models.Course.objects.get(id=course_id)
+		ppt_file = courses_models.PPTfile.objects.get(course=course,\
+		title=ppt_title)
+		ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file,\
+		index=slice_index)
+		ppt_total_page = len(ppt_slices)
+	except:
+		return HttpResponseRedirect('/404/')
 
 #	ppt_slices_data = []
 	for slice in ppt_slices:
@@ -150,8 +162,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 	print(course_data)
 	print('user_data')
 	print(user_data)
+	print('ppt_total_page')
+	print(ppt_total_page)
 
-	return render_to_response('player.html', {'logined': request.user.is_authenticated(),'user_data': user_data, \
+	return render_to_response('player.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'user_data': user_data, \
 	'ppt_slices_data': ppt_slices_data,'course_data':course_data,\
 	'question_data':question_data}, context_instance=RequestContext(request))
 
@@ -290,11 +304,11 @@ def feedback(request):
 		)
 		return HttpResponseRedirect('/thanks/')
 	else:
-		return render_to_response('feedback.html', {'logined': request.user.is_authenticated()},context_instance= \
+		return render_to_response('feedback.html', {'logined': request.user.is_authenticated(), 'user_name':request.user.username},context_instance= \
 		RequestContext(request))
 
 def thanks(request):
-	return render_to_response('thanks.html', {'logined': request.user.is_authenticated()})
+	return render_to_response('thanks.html', {'logined': request.user.is_authenticated(), 'user_name':request.user.username})
 
 # why this does not work?
 def create(request):
