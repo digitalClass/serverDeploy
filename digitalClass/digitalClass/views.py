@@ -69,7 +69,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 		title=ppt_title)
 		ppt_slices = courses_models.PPTslice.objects.filter(pptfile=ppt_file,\
 		index=slice_index)
-		ppt_total_page = len(ppt_slices)
+		ppt_total_page = len(courses_models.PPTslice.objects.filter(pptfile=ppt_file))
 	except:
 		return HttpResponseRedirect('/404/')
 
@@ -79,6 +79,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 		ps_data['index'] = slice.index
 		ps_data['date'] = slice.upload_time
 		ps_data['img_path'] = slice.img_path
+		ps_data['ppt_total_page'] = ppt_total_page
 #		ppt_slices_data.append(ps_data)
 		# we only process 1 slice each time at now.
 		ppt_slices_data = ps_data
