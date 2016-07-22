@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect,Http404,HttpResponse
 from courses.models import Course, PPTfile, PPTslice
 from users.models import User
-from form import *
+from courses.form import *
+from courses.filetype import *
 from django.template import RequestContext
 from digitalClass.utils import *
 import os
@@ -223,6 +224,10 @@ def ppt_upload(request,c_id):
 		    if If_ppt_existed:
 			return HttpResponse("A same named PPT has existed in this course!")
 		    fname = handle_upload_file(upload_file,course_id,ppt_title)
+		    ftype = filetype(fname)
+		    if ftype != "PDF":
+			#return HttpResponse(ftype)
+		        return HttpResponse("You have to upload a pdf file.")
 		    split_pdf(fname)
 		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],course_id=course_id)
 		    #return render_to_response()
