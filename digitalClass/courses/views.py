@@ -8,7 +8,7 @@ from courses.form import *
 from courses.filetype import *
 from django.template import RequestContext
 from digitalClass.utils import *
-from courses.tasks import split_pdf_background
+#from courses.tasks import split_pdf_background
 import os
 
 import datetime
@@ -78,7 +78,7 @@ def create_course(request):
 		    now = datetime.datetime.now()
 		    img = ''
 		    user_id = request.user.id
-		    course = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
+		    course = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'], teacher_name=f['course_teacher'])
 		    u = User.objects.get(id=user_id)
 		    course.teacher.add(u)
 		    return HttpResponseRedirect('/accounts/profile/')
@@ -107,6 +107,7 @@ def course_edit(request, c_id):
 		    course.title = f['course_title']
 		    course.introduce = f['course_data']
 		    course.course_id = f['course_id']
+		    course.teacher_name = f['course_teacher']
 		    course.save()
 		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
@@ -231,7 +232,7 @@ def ppt_upload(request,c_id):
 		        return HttpResponse("You have to upload a pdf file.")
 		    #split_pdf_background.delay(fname)
 		    split_pdf(fname)
-		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],course_id=course_id)
+		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],source=fname,course_id=course_id)
 		    #return render_to_response()
 		    #return HttpResponse(fname)
 		    if fname:
