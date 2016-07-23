@@ -2,8 +2,10 @@ from django.shortcuts import render
 
 from comments.models import Question, Answer, Question_Comment, Answer_Comment
 from courses.models import Course, PPTfile, PPTslice
-# Create your views here.
+
 def get_question(course_id, ppt_title, slice_index):
+	"Get questions that statisfies certain course_id, ppt_title, slice_index"
+
 	questions = []
 	try:
 		curr_course = Course.objects.get(id=course_id)	
@@ -17,6 +19,8 @@ def get_question(course_id, ppt_title, slice_index):
 
 
 def get_answer(q):
+	"Get anwers of a certain question"
+
 	answers = []
 	try:
 		answers= Answer.objects.filter(question=q)	
@@ -26,6 +30,8 @@ def get_answer(q):
 
 
 def get_question_comment(q):
+	"Get comments of a certain question"
+
 	question_comments = []
 	try:
 		question_comments = Question_Comment.objects.filter(question=q)	
@@ -35,6 +41,8 @@ def get_question_comment(q):
 
 
 def get_answer_comment(a):
+	"Get comments of a certain answer"
+
 	answer_comments = []
 	try:
 		answer_comments = Answer_Comment.objects.filter(answer=a)	
