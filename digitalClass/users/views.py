@@ -7,6 +7,9 @@ from django.template.response import TemplateResponse
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import update_session_auth_hash
+from django.views.decorators.debug import sensitive_post_parameters
 
 from .compat import urlsafe_base64_decode
 from .conf import settings
@@ -27,6 +30,7 @@ else:
     from .forms import RegistrationForm
 
 from .forms import EditForm
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 @csrf_protect
@@ -128,7 +132,7 @@ def activate(request,
              uidb64=None,
              token=None,
              template_name='users/activate.html',
-             post_activation_redirect=None,
+             post_activation_redirect='/',
              current_app=None,
              extra_context=None):
 
@@ -237,3 +241,44 @@ def edit(request,template_name='users/edit.html',
         context.update(extra_context)
     return TemplateResponse(request, template_name, context,
                             current_app=current_app)
+
+@sensitive_post_parameters()
+@csrf_protect
+@login_required
+def password_change(request,
+                    template_name='registration/password_change_form.html',
+                    post_change_redirect=None,
+                    password_change_form=PasswordChangeForm,
+                    extra_context=None):
+    if post_change_redirect is None:
+        post_change_redirect = reverse('password_change_done')
+    else:
+        post_change_redirect = resolve_url(post_change_redirect)
+    if request.method == "POST":
+        form = password_change_form(user=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            # Updating the password logs out all other sessions for the user
+            # except the current one if
+            # django.contrib.auth.middleware.SessionAuthenticationMiddleware
+            # is enabled.
+            update_session_auth_hash(request, form.user)
+            return redirect(post_change_redirect)
+    else:
+        form = password_change_form(user=request.user)
+    if request.user.useravatar:
+        useravatar = request.user.useravatar
+    else:
+        useravatar = 'avatar/default.png'
+    context = {
+        'form': form,
+        'logined': True,
+        'user_name': request.user.username,
+        'useravatar': useravatar
+    }
+    if extra_context is not None:
+        context.update(extra_context)
+
+    return TemplateResponse(request, template_name, context)
+
+
