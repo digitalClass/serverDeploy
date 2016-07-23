@@ -8,6 +8,7 @@ from courses.form import *
 from courses.filetype import *
 from django.template import RequestContext
 from digitalClass.utils import *
+from courses.tasks import split_pdf_background
 import os
 
 import datetime
@@ -228,6 +229,7 @@ def ppt_upload(request,c_id):
 		    if ftype != "PDF":
 			#return HttpResponse(ftype)
 		        return HttpResponse("You have to upload a pdf file.")
+		    #split_pdf_background.delay(fname)
 		    split_pdf(fname)
 		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],course_id=course_id)
 		    #return render_to_response()
