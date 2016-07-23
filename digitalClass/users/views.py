@@ -1,3 +1,4 @@
+#!coding=utf8
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.core.urlresolvers import reverse
@@ -57,6 +58,9 @@ def register(request,
     if request.method == 'POST':
         form = registration_form(request.POST,request.FILES)
         if form.is_valid():
+            if form.useravatar==None:
+                print "yes"
+                form.useravatar='avatar/default.png'
             # user.useravatar=SaveFile(request.FILES['useravatar'],'avatar/')
             user = form.save()
             if settings.USERS_AUTO_LOGIN_AFTER_REGISTRATION:
@@ -215,6 +219,10 @@ def edit(request,template_name='users/edit.html',
         form = edit_form(initial=INITIAL)
 
     current_site = get_current_site(request)
+    if request.user.useravatar:
+        useravatar = request.user.useravatar
+    else:
+        useravatar = 'avatar/default.png'
     context = {
         'logined': True,
         'form': form,
@@ -222,7 +230,7 @@ def edit(request,template_name='users/edit.html',
         'site_name': current_site.name,
         'title': 'Modify personal information',
         'user_name': request.user.username,
-        'useravatar': request.user.useravatar
+        'useravatar': useravatar
     }
 
     if extra_context is not None:  # pragma: no cover
