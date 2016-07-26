@@ -17,6 +17,7 @@ class Course(models.Model):
 	title = models.CharField(max_length=32)
 	course_id = models.CharField(max_length=16, null=True)
 	#课程老师
+	teacher_name = models.CharField(max_length=16,default="None")
 	teacher = models.ManyToManyField(users_models.User,related_name="teacher")
 	#课程助教
 	teaching_assitant = models.ManyToManyField(users_models.User, related_name="teaching_assistant")
@@ -36,6 +37,7 @@ class PPTfile(models.Model):
 	upload_time = models.DateTimeField()
 	#PPT名称
 	title = models.CharField(max_length=32)
+	source = models.CharField(max_length=256,default="")
 	course = models.ForeignKey(Course)
 	def __str__(self):
 	    return self.title

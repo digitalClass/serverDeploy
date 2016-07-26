@@ -80,7 +80,7 @@ def create_course(request):
 		    now = datetime.datetime.now()
 		    img = ''
 		    user_id = request.user.id
-		    course = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'])
+		    course = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'], teacher_name=f['course_teacher'])
 		    u = User.objects.get(id=user_id)
 		    course.teacher.add(u)
 		    return HttpResponseRedirect('/accounts/profile/')
@@ -109,6 +109,7 @@ def course_edit(request, c_id):
 		    course.title = f['course_title']
 		    course.introduce = f['course_data']
 		    course.course_id = f['course_id']
+		    course.teacher_name = f['course_teacher']
 		    course.save()
 		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
@@ -238,11 +239,13 @@ def ppt_upload(request,c_id):
 		    if ftype != "PDF":
 			#return HttpResponse(ftype)
 		        return HttpResponse("You have to upload a pdf file.")
-		    #split_pdf_background.delay(fname)
-		    split_pdf(fname)
-		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],course_id=course_id)
+		    #split_pdf_background.delay(fname,course_id)
+		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],source=fname,course_id=course_id)
+		    split_pdf(fname,course_id,ppt_title)
+		    name = os.path.split(fname)[1].split(".")[0]
+		    #print name
+		    return HttpResponse(name)
 		    #return render_to_response()
-		    #return HttpResponse(fname)
 		    if fname:
 		        return HttpResponse("Successful.html")
 	    else:
