@@ -8,7 +8,7 @@ from courses.form import *
 from courses.filetype import *
 from django.template import RequestContext
 from digitalClass.utils import *
-from courses.tasks import split_pdf_background
+#from courses.tasks import split_pdf_background
 import os
 
 import datetime
