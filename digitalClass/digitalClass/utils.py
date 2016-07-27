@@ -28,7 +28,7 @@ def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 	if save_dir == None:
 		save_dir = os.path.split(pdf_path)[0]
 	try:
-		subprocess.call(['convert', pdf_path, save_dir+'/%d.jpg'])
+		subprocess.call(['convert', '-density', '150', '-trim', pdf_path, '-quality', '100', save_dir+'/%d.jpg'])
 		now = datetime.datetime.now()
 		course = Course.objects.get(id=course_id)
 		pptfile = course.pptfile_set.filter(title=ppt_title)
