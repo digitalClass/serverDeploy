@@ -110,6 +110,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 		#get basic info about the certain question
 		q_data['question_id'] = q.id
 		q_data['username'] = q.user.username
+		user_avatar = q.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL':
+			user_avatar = 'avatar/default.png'
+		q_data['user_avatar'] = '/media/'+user_avatar
 		q_data['date'] = q.date
 		q_data['content'] = q.content
 		q_data['num_vote'] = q.num_vote
@@ -120,6 +124,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 		for qc in question_comments:
 				qc_data = {}
 				qc_data['username'] = qc.user.username
+				user_avatar = q.user.useravatar.name
+				if user_avatar == '' or user_avatar =='NULL':
+					user_avatar = 'avatar/default.png'
+				qc_data['user_avatar'] = '/media/'+user_avatar
 				qc_data['date'] = qc.date
 				qc_data['content'] = qc.content
 				question_comments_data.append(qc_data)
@@ -132,6 +140,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 			a_data = {}
 			a_data['answer_id'] = a.id
 			a_data['username'] = a.user.username
+			user_avatar = q.user.useravatar.name
+			if user_avatar == '' or user_avatar =='NULL':
+				user_avatar = 'avatar/default.png'
+			a_data['user_avatar'] = '/media/'+user_avatar
 			a_data['date'] = a.date
 			a_data['content'] = a.content
 			a_data['num_vote'] = a.num_vote
@@ -142,6 +154,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 			for ac in answer_comments:
 				ac_data = {}
 				ac_data['username'] = ac.user.username
+				user_avatar = q.user.useravatar.name
+				if user_avatar == '' or user_avatar =='NULL':
+					user_avatar = 'avatar/default.png'
+				ac_data['user_avatar'] = '/media/'+user_avatar
 				ac_data['date'] = ac.date
 				ac_data['content'] = ac.content
 				answer_comments_data.append(ac_data)
