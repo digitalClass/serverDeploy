@@ -28,7 +28,7 @@ def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 	if save_dir == None:
 		save_dir = os.path.split(pdf_path)[0]
 	try:
-		subprocess.call(['convert', '-trim', pdf_path, '-quality', '100', save_dir+'/%d.jpg'])
+		subprocess.call(['convert', '-verbose',  pdf_path, '-quality', '100', save_dir+'/%d.jpg'])
 		now = datetime.datetime.now()
 		course = Course.objects.get(id=course_id)
 		pptfile = course.pptfile_set.filter(title=ppt_title)
@@ -42,7 +42,12 @@ def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 			pardir = os.path.join(save_dir, os.pardir)
 			create_thumbnail(os.path.join(save_dir,'1.jpg'),save_dir=pardir)
 			img_path = glob.glob(os.path.join(pardir,'*.thumbnail'))[0]
-			course.img_path = img_path
+
+			parent_dir = os.path.dirname(os.path.dirname(pardir))
+			parent_url_dir = parent_dir[0:6]+parent_dir[19:]
+			img_ur_path = parent_url_dir+'/1.thumbnail'
+
+			course.img_path = img_ur_path
 			course.save()
 	except:
 		pass
