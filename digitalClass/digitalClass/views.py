@@ -239,6 +239,7 @@ def add_comments(request):
 		code = -1
 		msg = '请检查是否登录'
 		new_answer_id = -4
+		new_question_id = -4
 		content = request.POST['content']
 		user_id = int(request.user.id)
 		question_id = int(request.POST['question_id'])
@@ -263,6 +264,7 @@ def add_comments(request):
 			course=course,ppt_file=ppt_file, ppt_slice=ppt_slice, content=content,\
 			num_vote = 0)
 			new_question.save()
+			new_question_id = new_question.id
 			code = 0
 			msg = ''
 
@@ -300,7 +302,7 @@ def add_comments(request):
 			msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
-		'answer_id':new_answer_id}), content_type="application/json")
+		'answer_id':new_answer_id, 'question_id': new_question_id}), content_type="application/json")
 
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
