@@ -40,12 +40,12 @@ def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 				ppt = PPTslice.objects.create(index=index, upload_time=now, img_path=ppt_url_path, pptfile=pptfile[0])
 		if create_img:
 			pardir = os.path.join(save_dir, os.pardir)
-			create_thumbnail(os.path.join(save_dir,'1.jpg'),save_dir=pardir)
+			create_thumbnail(os.path.join(save_dir,'0.jpg'),save_dir=pardir)
 			img_path = glob.glob(os.path.join(pardir,'*.thumbnail'))[0]
 
 			parent_dir = os.path.dirname(os.path.dirname(pardir))
 			parent_url_dir = parent_dir[0:6]+parent_dir[19:]
-			img_ur_path = parent_url_dir+'/1.thumbnail'
+			img_ur_path = parent_url_dir+'/0.thumbnail'
 
 			course.img_path = img_ur_path
 			course.save()
