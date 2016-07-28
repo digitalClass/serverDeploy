@@ -22,15 +22,20 @@ from users.models import User
 now = datetime.datetime.now()
 def homepage(request):
     # 不用登陆也能看到课程列表
+    page_num = 15
     courses = courses_models.Course.objects.all()
+    total_page = round(float(courses.count()) / page_num)
     if request.user.is_authenticated():
         username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,"courses":courses})
+        return render_to_response("index.html",{"logined":True,\
+		'user_name':username,'user_id':user_id,'user_role':user_role,\
+		"courses":courses[:page_num], 'curpage':1, 'total_page': total_page,\
+		'page_num': page_num})
     else:
-        return render_to_response("index.html",{"logined": False,"courses":courses})
+        return render_to_response("index.html",{"logined": False,"courses":courses,'curpage':1, 'total_page': total_page,'page_num': 20})
 
 @login_required
 def profile(request,
@@ -302,12 +307,52 @@ def add_comments(request):
 			msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
-		'answer_id':new_answer_id, 'question_id': new_question_id}), content_type="application/json")
+		'answer_id':new_answer_id, 'question_id': new_question_id}), \
+		content_type="application/json")
 
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
 		"application/json")
 
+def page_change(request):
+	page_num = 15
+	code = '-1'
+	msg = '未知错误'
+	if request.method == 'POST':
+		print('=============post:')
+		print(request.POST)
+		page_id = int(request.POST['page_id'])
+		begin_num = (page_id - 1) * page_num
+		end_num = (page_id) * page_num
+		all_courses = courses_models.Course.objects.all().order_by('id')
+		total_num = all_courses.count()
+		if total_num < end_num:
+			end_num = total_num
+		curr_courses = all_courses[begin_num:end_num]
+		item_count = end_num - begin_num
+		courses_data = []
+		item_count = 0
+		for cc in curr_courses:
+			cc_data = {}
+			cc_data['id'] = cc.id
+			cc_data['title'] = cc.title
+			cc_data['create_time'] = cc.create_time
+			cc_data['teacher_name'] = cc.teacher_name
+			courses_data.append(cc_data)
+		
+		print('course:')
+		print(courses_data)
+		print('item_count:')
+		print(item_count)
+		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
+		'course':courses_data, 'item_count': item_count}), \
+		content_type="application/json")
+
+	else:
+		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
+		"application/json")
+
+	
 def feedback(request):
 	if request.method == "POST":
 		user = request.user

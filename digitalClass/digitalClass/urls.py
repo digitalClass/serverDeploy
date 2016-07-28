@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^thanks/$', digitalClass_views.thanks),
     url(r'^classroom/(\w+)/(\w+)/(\-{0,1}\w+)/$',digitalClass_views.classroom),
     url(r'^addvote/$', digitalClass_views.add_vote),
+    url(r'^page_change/$', digitalClass_views.page_change),
 ]
 
 urlpatterns += [
