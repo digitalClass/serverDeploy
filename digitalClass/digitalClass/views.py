@@ -7,6 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 import datetime
 import json
+import urllib
 
 from comments import models as comments_models
 from comments import views as comments_views
@@ -227,7 +228,9 @@ def add_comments(request):
 		question_id = int(request.POST['question_id'])
 		answer_id = int(request.POST['answer_id'])
 		course_id = int(request.POST['course_id'])
-		ppt_file_title = request.POST['ppt_file_title']
+		ppt_file_title = urllib.unquote(request.POST['ppt_file_title'])
+		#change the unicode type variable to str variable 
+		ppt_file_title = ppt_file_title.encode('latin-1')
 		ppt_slice_id = int(request.POST['ppt_slice_id'])
 
 		curr_user = users_models.User.objects.get(id=user_id)
