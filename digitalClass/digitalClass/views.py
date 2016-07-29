@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 import datetime
 import json
 import urllib
+import math
 
 from comments import models as comments_models
 from comments import views as comments_views
@@ -22,9 +23,11 @@ from users.models import User
 now = datetime.datetime.now()
 def homepage(request):
     # 不用登陆也能看到课程列表
-    page_num = 15
+    page_num = 12
     courses = courses_models.Course.objects.all()
-    total_page = round(float(courses.count()) / page_num)
+	#get number of total page, use ceil function to ensure correction
+    total_page = int(math.ceil(float(courses.count()) / page_num))
+    print('================total_page', total_page)
     if request.user.is_authenticated():
         username = request.user.username
         user_id = request.user.id
@@ -315,7 +318,7 @@ def add_comments(request):
 		"application/json")
 
 def page_change(request):
-	page_num = 15
+	page_num = 12
 	code = '-1'
 	msg = '未知错误'
 	if request.method == 'POST':
@@ -331,14 +334,16 @@ def page_change(request):
 		curr_courses = all_courses[begin_num:end_num]
 		item_count = end_num - begin_num
 		courses_data = []
-		item_count = 0
 		for cc in curr_courses:
 			cc_data = {}
 			cc_data['id'] = cc.id
 			cc_data['title'] = cc.title
-			cc_data['create_time'] = cc.create_time
+			#transfer the datetime object to string and remove its hh:mm:ss
+			cc_data['create_time'] = str(cc.create_time).split(' ')[0]
 			cc_data['teacher_name'] = cc.teacher_name
 			courses_data.append(cc_data)
+			code = '0'
+			msg = ''
 		
 		print('course:')
 		print(courses_data)
