@@ -38,7 +38,8 @@ def homepage(request):
 		"courses":courses[:page_num], 'curpage':1, 'total_page': total_page,\
 		'page_num': page_num})
     else:
-        return render_to_response("index.html",{"logined": False,"courses":courses,'curpage':1, 'total_page': total_page,'page_num': 20})
+        return render_to_response("index.html",{"logined": False,"courses":courses[:page_num],'curpage':1, 'total_page': total_page,'page_num': page_num})
+		
 
 @login_required
 def profile(request,
