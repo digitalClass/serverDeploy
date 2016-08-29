@@ -219,9 +219,20 @@ def add_vote(request):
 			if curr_question == []:
 					msg = '当前的问题不存在'
 			else:
-				curr_question.update(num_vote=curr_question[0].num_vote+1)
-				code = 0
-				msg = ''
+				if comments_models.Question_Vote.objects.filter(question=curr_question[0], user=curr_user):
+					msg = '您已经点过赞了'
+
+				else:
+					print('curr_question:')
+					print(curr_question)
+					print('curr_user:')
+					print(curr_user)
+					new_qv = comments_models.Question_Vote(date=now, question=curr_question[0], user=curr_user);
+					new_qv.save()
+
+					curr_question.update(num_vote=curr_question[0].num_vote+1)
+					code = 0
+					msg = ''
 
 		#vote on an answer
 		else:
@@ -229,9 +240,18 @@ def add_vote(request):
 			if curr_answer == []:
 					msg = '当前的回答不存在'
 			else:
-				curr_answer.update(num_vote=curr_answer[0].num_vote+1)
-				code = 0
-				msg = ''
+				if comments_models.Answer_Vote.objects.filter(answer=curr_answer[0], user=curr_user):
+					msg = '您已经点过赞了'
+				else:
+					print('curr_answer:')
+					print(curr_answer)
+					print('curr_user:')
+					print(curr_user)
+					new_av = comments_models.Answer_Vote(date=now, answer=curr_answer[0], user=curr_user);
+					new_av.save()
+					curr_answer.update(num_vote=curr_answer[0].num_vote+1)
+					code = 0
+					msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':\
 		new_answer_id}), content_type="application/json")

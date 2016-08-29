@@ -57,3 +57,18 @@ class Answer_Comment(models.Model):
 	def __unicode__(self):
 		return self.content
 
+class Question_Vote(models.Model):
+	""" define table between quetion and its vote user"""
+
+	date = models.DateTimeField()
+	question = models.ForeignKey(Question, null=True)
+	user = models.ForeignKey(users_models.User, null=True)
+
+
+class Answer_Vote(models.Model):
+	""" define table between answer and its vote user"""
+
+	date = models.DateTimeField()
+	answer = models.ForeignKey(Answer, null=True)
+	user = models.ForeignKey(users_models.User, null=True)
+
