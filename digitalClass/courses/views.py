@@ -85,7 +85,8 @@ def create_course(request):
 		    course.teacher.add(u)
 		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
-		form = CreateCourseForm({'subject':'SUBJECT', 'course_id':'COUSRSE ID'})
+		#form = CreateCourseForm({'course_title':'课程名称', 'course_id':'课程编号', 'course_teacher':'任课老师'})
+		form = CreateCourseForm()
             return render_to_response('create.html',{'form':form,"logined":logined,"user_name":request.user.username},context_instance=RequestContext(request))
     return render_to_response("premissionDeniey.html")
 
@@ -233,21 +234,27 @@ def ppt_upload(request,c_id):
 		    upload_file = request.FILES['file']
 		    If_ppt_existed = course.pptfile_set.filter(title=ppt_title)
 		    if If_ppt_existed:
-			return HttpResponse("A same named PPT has existed in this course!")
+			#return HttpResponse("A same named PPT has existed in this course!")
+			return render_to_response('test_course/ppt_upload_fail_crush.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
 		    fname = handle_upload_file(upload_file,course_id,ppt_title)
 		    ftype = filetype(fname)
 		    if ftype != "PDF":
 			#return HttpResponse(ftype)
-		        return HttpResponse("You have to upload a pdf file.")
+		        #return HttpResponse("You have to upload a pdf file.")
+			return render_to_response('test_course/ppt_upload_fail_type.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
 		    #split_pdf_background.delay(fname,course_id)
 		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],source=fname,course_id=course_id)
-		    split_pdf(fname,course_id,ppt_title)
-		    name = os.path.split(fname)[1].split(".")[0]
+		    if course.img_path=='':
+		    	split_pdf(fname,course_id,ppt_title,True)
+		    else:
+		    	split_pdf(fname,course_id,ppt_title)
+		    #name = os.path.split(fname)[1].split(".")[0]
 		    #print name
-		    return HttpResponse(name)
+		    #return HttpResponse(name)
 		    #return render_to_response()
 		    if fname:
-		        return HttpResponse("Successful.html")
+		        #return HttpResponse("Successful.html")
+			return render_to_response('test_course/ppt_upload_success.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
 	    else:
 		form = UploadPPTForm()
             return render_to_response('test_course/ppt_upload.html',{'form':form,'logined':logined,'user_name':request.user.username}, context_instance=RequestContext(request))
@@ -256,8 +263,9 @@ def ppt_upload(request,c_id):
 def handle_upload_file(f,course_id,title):
     file_name=""
     try:
-	#path = "media/editor" + datetime.time.strftime('/%Y/%m/%d/%H/%M/%S/')
-	path = "media/digitalClass/ppts/%d/%s/"%(course_id,title)
+	#path = os.path.join('media','digitalClass','ppts',course_id,title)
+	#print 'path:',path
+	path = "/media/digitalClass/ppts/%d/%s/"%(course_id,title)
 	if not os.path.exists(path):
 	    os.makedirs(path)
 	file_name = path + f.name

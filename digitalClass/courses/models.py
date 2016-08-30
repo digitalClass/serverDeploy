@@ -1,6 +1,6 @@
 #coding:utf-8
 from __future__ import unicode_literals
-
+from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 from users import models as users_models
 
@@ -26,9 +26,10 @@ class Course(models.Model):
 	def __str__(self):
 	    return self.title
 	class Meta:
-	    ordering = ['title']
+	    ordering = ['create_time']
 
 
+@python_2_unicode_compatible
 class PPTfile(models.Model):
 	#采用内置自增id
 	#id = models.IntegerField(primary_key=true)

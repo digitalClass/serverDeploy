@@ -7,6 +7,8 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 import datetime
 import json
+import urllib
+import math
 
 from comments import models as comments_models
 from comments import views as comments_views
@@ -21,15 +23,23 @@ from users.models import User
 now = datetime.datetime.now()
 def homepage(request):
     # 不用登陆也能看到课程列表
+    page_num = 12
     courses = courses_models.Course.objects.all()
+	#get number of total page, use ceil function to ensure correction
+    total_page = int(math.ceil(float(courses.count()) / page_num))
+    print('================total_page', total_page)
     if request.user.is_authenticated():
         username = request.user.username
         user_id = request.user.id
         # te:Teacher;ta:TeachAssisstant;st:Student
         user_role = request.user.user_role
-        return render_to_response("index.html",{"logined":True,'user_name':username,'user_id':user_id,'user_role':user_role,"courses":courses})
+        return render_to_response("index.html",{"logined":True,\
+		'user_name':username,'user_id':user_id,'user_role':user_role,\
+		"courses":courses[:page_num], 'curpage':1, 'total_page': total_page,\
+		'page_num': page_num})
     else:
-        return render_to_response("index.html",{"logined": False,"courses":courses})
+        return render_to_response("index.html",{"logined": False,"courses":courses[:page_num],'curpage':1, 'total_page': total_page,'page_num': page_num})
+		
 
 @login_required
 def profile(request,
@@ -109,6 +119,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 		#get basic info about the certain question
 		q_data['question_id'] = q.id
 		q_data['username'] = q.user.username
+		user_avatar = q.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL':
+			user_avatar = 'avatar/default.png'
+		q_data['user_avatar'] = '/media/'+user_avatar
 		q_data['date'] = q.date
 		q_data['content'] = q.content
 		q_data['num_vote'] = q.num_vote
@@ -119,6 +133,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 		for qc in question_comments:
 				qc_data = {}
 				qc_data['username'] = qc.user.username
+				user_avatar = q.user.useravatar.name
+				if user_avatar == '' or user_avatar =='NULL':
+					user_avatar = 'avatar/default.png'
+				qc_data['user_avatar'] = '/media/'+user_avatar
 				qc_data['date'] = qc.date
 				qc_data['content'] = qc.content
 				question_comments_data.append(qc_data)
@@ -131,6 +149,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 			a_data = {}
 			a_data['answer_id'] = a.id
 			a_data['username'] = a.user.username
+			user_avatar = q.user.useravatar.name
+			if user_avatar == '' or user_avatar =='NULL':
+				user_avatar = 'avatar/default.png'
+			a_data['user_avatar'] = '/media/'+user_avatar
 			a_data['date'] = a.date
 			a_data['content'] = a.content
 			a_data['num_vote'] = a.num_vote
@@ -141,6 +163,10 @@ def classroom(request, course_id, ppt_title, slice_index):
 			for ac in answer_comments:
 				ac_data = {}
 				ac_data['username'] = ac.user.username
+				user_avatar = q.user.useravatar.name
+				if user_avatar == '' or user_avatar =='NULL':
+					user_avatar = 'avatar/default.png'
+				ac_data['user_avatar'] = '/media/'+user_avatar
 				ac_data['date'] = ac.date
 				ac_data['content'] = ac.content
 				answer_comments_data.append(ac_data)
@@ -193,9 +219,20 @@ def add_vote(request):
 			if curr_question == []:
 					msg = '当前的问题不存在'
 			else:
-				curr_question.update(num_vote=curr_question[0].num_vote+1)
-				code = 0
-				msg = ''
+				if comments_models.Question_Vote.objects.filter(question=curr_question[0], user=curr_user):
+					msg = '您已经点过赞了'
+
+				else:
+					print('curr_question:')
+					print(curr_question)
+					print('curr_user:')
+					print(curr_user)
+					new_qv = comments_models.Question_Vote(date=now, question=curr_question[0], user=curr_user);
+					new_qv.save()
+
+					curr_question.update(num_vote=curr_question[0].num_vote+1)
+					code = 0
+					msg = ''
 
 		#vote on an answer
 		else:
@@ -203,9 +240,18 @@ def add_vote(request):
 			if curr_answer == []:
 					msg = '当前的回答不存在'
 			else:
-				curr_answer.update(num_vote=curr_answer[0].num_vote+1)
-				code = 0
-				msg = ''
+				if comments_models.Answer_Vote.objects.filter(answer=curr_answer[0], user=curr_user):
+					msg = '您已经点过赞了'
+				else:
+					print('curr_answer:')
+					print(curr_answer)
+					print('curr_user:')
+					print(curr_user)
+					new_av = comments_models.Answer_Vote(date=now, answer=curr_answer[0], user=curr_user);
+					new_av.save()
+					curr_answer.update(num_vote=curr_answer[0].num_vote+1)
+					code = 0
+					msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg, 'answer_id':\
 		new_answer_id}), content_type="application/json")
@@ -222,12 +268,15 @@ def add_comments(request):
 		code = -1
 		msg = '请检查是否登录'
 		new_answer_id = -4
+		new_question_id = -4
 		content = request.POST['content']
 		user_id = int(request.user.id)
 		question_id = int(request.POST['question_id'])
 		answer_id = int(request.POST['answer_id'])
 		course_id = int(request.POST['course_id'])
-		ppt_file_title = request.POST['ppt_file_title']
+		ppt_file_title = urllib.unquote(request.POST['ppt_file_title'])
+		#change the unicode type variable to str variable 
+		ppt_file_title = ppt_file_title.encode('latin-1')
 		ppt_slice_id = int(request.POST['ppt_slice_id'])
 
 		curr_user = users_models.User.objects.get(id=user_id)
@@ -244,6 +293,7 @@ def add_comments(request):
 			course=course,ppt_file=ppt_file, ppt_slice=ppt_slice, content=content,\
 			num_vote = 0)
 			new_question.save()
+			new_question_id = new_question.id
 			code = 0
 			msg = ''
 
@@ -281,12 +331,54 @@ def add_comments(request):
 			msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
-		'answer_id':new_answer_id}), content_type="application/json")
+		'answer_id':new_answer_id, 'question_id': new_question_id}), \
+		content_type="application/json")
 
 	else:
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
 		"application/json")
 
+def page_change(request):
+	page_num = 12
+	code = '-1'
+	msg = '未知错误'
+	if request.method == 'POST':
+		print('=============post:')
+		print(request.POST)
+		page_id = int(request.POST['page_id'])
+		begin_num = (page_id - 1) * page_num
+		end_num = (page_id) * page_num
+		all_courses = courses_models.Course.objects.all().order_by('id')
+		total_num = all_courses.count()
+		if total_num < end_num:
+			end_num = total_num
+		curr_courses = all_courses[begin_num:end_num]
+		item_count = end_num - begin_num
+		courses_data = []
+		for cc in curr_courses:
+			cc_data = {}
+			cc_data['id'] = cc.id
+			cc_data['title'] = cc.title
+			#transfer the datetime object to string and remove its hh:mm:ss
+			cc_data['create_time'] = str(cc.create_time).split(' ')[0]
+			cc_data['teacher_name'] = cc.teacher_name
+			courses_data.append(cc_data)
+			code = '0'
+			msg = ''
+		
+		print('course:')
+		print(courses_data)
+		print('item_count:')
+		print(item_count)
+		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
+		'course':courses_data, 'item_count': item_count}), \
+		content_type="application/json")
+
+	else:
+		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
+		"application/json")
+
+	
 def feedback(request):
 	if request.method == "POST":
 		user = request.user
