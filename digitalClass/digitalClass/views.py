@@ -36,9 +36,9 @@ def homepage(request):
         return render_to_response("index.html",{"logined":True,\
 		'user_name':username,'user_id':user_id,'user_role':user_role,\
 		"courses":courses[:page_num], 'curpage':1, 'total_page': total_page,\
-		'page_num': page_num})
+		'page_num': page_num, 'page_num_list': range(1,total_page+1)})
     else:
-        return render_to_response("index.html",{"logined": False,"courses":courses[:page_num],'curpage':1, 'total_page': total_page,'page_num': page_num})
+        return render_to_response("index.html",{"logined": False,"courses":courses[:page_num],'curpage':1, 'total_page': total_page,'page_num': page_num, 'page_num_list': range(1, total_page+1)})
 		
 
 @login_required
@@ -96,6 +96,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 
 	course_data = {}
 	course = courses_models.Course.objects.get(id=course_id)
+	course_data['id'] = course.id
 	course_data['course_id'] = course.course_id
 	course_data['title'] = course.title
 	teachers = course.teacher.all()

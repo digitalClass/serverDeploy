@@ -15,6 +15,7 @@ from .compat import urlsafe_base64_decode
 from .conf import settings
 from .signals import user_activated, user_registered
 from .utils import EmailActivationTokenGenerator, send_activation_email
+from django.shortcuts import render_to_response
 
 try:
     from django.contrib.sites.shortcuts import get_current_site
@@ -263,7 +264,8 @@ def password_change(request,
             # django.contrib.auth.middleware.SessionAuthenticationMiddleware
             # is enabled.
             update_session_auth_hash(request, form.user)
-            return redirect(post_change_redirect)
+            # return redirect(post_change_redirect)
+            return TemplateResponse(request, 'users/password_change_done.html', {'logined': True, 'user_name':request.user.username})
     else:
         form = password_change_form(user=request.user)
     if request.user.useravatar:
