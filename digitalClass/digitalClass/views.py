@@ -264,6 +264,10 @@ def add_vote(request):
 @login_required
 def add_comments(request):
 	now = datetime.datetime.now()
+	user_avatar = request.user.useravatar.name
+	if user_avatar == '' or user_avatar =='NULL':
+		user_avatar = 'avatar/default.png'
+	user_avatar = '/media/'+user_avatar
 	if request.method == 'POST':
 		print(request.POST)
 		code = -1
@@ -332,11 +336,11 @@ def add_comments(request):
 			msg = ''
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
-		'answer_id':new_answer_id, 'question_id': new_question_id}), \
+		'answer_id':new_answer_id, 'question_id': new_question_id, 'user_avatar': user_avatar}), \
 		content_type="application/json")
 
 	else:
-		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
+		return HttpResponse(json.dumps({'code':0, 'msg': '','user_avatar': user_avatar}), content_type= \
 		"application/json")
 
 def page_change(request):
