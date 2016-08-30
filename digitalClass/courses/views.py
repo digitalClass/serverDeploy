@@ -208,7 +208,6 @@ def course_test(request, c_id):
 
 @login_required
 def ppt_upload(request,c_id):
-    #hang in the air(a ppt cut tool is needed.)
     #show uploaded files
     #uploaded_list = []
     #how to upload more than one file
