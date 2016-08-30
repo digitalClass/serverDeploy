@@ -13,9 +13,9 @@ from .fields import HoneyPotField, PasswordField, UsersEmailField
 class UserCreationForm(forms.ModelForm):
 
     error_messages = {
-        'duplicate_email': _('A user with that email already exists.'),
-        'password_mismatch': _('The two password fields didn\'t match.'),
-        'student_number':_('The number is not a valid USTC student number.')
+        'duplicate_email': _('邮件地址已被注册！'),
+        'password_mismatch': _('两次密码不一致！'),
+        'student_number':_('不是有效的科大学号！')
     }
 
     username = models.CharField(max_length=30)
@@ -71,9 +71,8 @@ class UserCreationForm(forms.ModelForm):
 class UserChangeForm(forms.ModelForm):
 
     password = ReadOnlyPasswordHashField(label=_('Password'), help_text=_(
-        'Raw passwords are not stored, so there is no way to see '
-        'this user\'s password, but you can change the password '
-        'using <a href=\"password/\">this form</a>.'))
+        '我们不会存储密码明文, 所以无法看到您的密码 '
+        '但你可以<a href=\"password/\">在此</a>修改您的密码.'))
 
     class Meta:
         model = get_user_model()
