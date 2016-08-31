@@ -99,11 +99,12 @@ def classroom(request, course_id, ppt_title, slice_index):
 	course_data['id'] = course.id
 	course_data['course_id'] = course.course_id
 	course_data['title'] = course.title
-	teachers = course.teacher.all()
-	teacher_data = []
-	for i in range(len(teachers)):
-		teacher_data.append(teachers[i].username)
-	course_data['teacher'] = teacher_data
+#	teachers = course.teacher.all()
+#	teacher_data = []
+#	for i in range(len(teachers)):
+#		teacher_data.append(teachers[i].username)
+#	course_data['teacher'] = teacher_data
+	course_data['teacher'] = course.teacher_name 
 
 	tas = course.teaching_assitant.all()
 	tas_data = []
