@@ -43,13 +43,13 @@ def profile(request):
 	    return HttpResponse('something wrong!')
 
 	if user_role == 'te':
-	    course_list = user.teacher.all()
+	    course_list = user.teacher.filter(deleted=False)
 	elif user_role == 'ta':
 	    return HttpResponseRedirect('')
 	 #Teaching Assistant's profile
 	else:
 	    #Student's profile
-	    course_list = user.subscribed_user.all()
+	    course_list = user.subscribed_user.filter(deleted=False)
         return render_to_response('users/profile.html',{"logined":logined,"user_name":user_name,"user_id":user_id,"user_role":user_role,"useravatar":useravatar, "course_list":course_list})
     return render_to_response("premissionDeniey.html")
 
@@ -97,7 +97,7 @@ def course_edit(request, c_id):
     except ValueError:
 	raise HttpResponse('Please input correct CourseID ')
     try:
-        course = Course.objects.get(id=course_id)
+        course = Course.objects.get(id=course_id,deleted=False)
     except Course.DoesNotExist:
 	return HttpResponse('Course does not exist')
     if request.user.is_authenticated():
@@ -128,7 +128,7 @@ def course_page(request, c_id):
     except ValueError:
 	raise Http404()
     try:
-        course = Course.objects.get(id=course_id)
+        course = Course.objects.get(id=course_id,deleted=False)
     except Course.DoesNotExist:
 	return HttpResponse('Course does not exist')
     ppts = course.pptfile_set.all()
@@ -217,7 +217,7 @@ def ppt_upload(request,c_id):
     except ValueError:
         raise Http404()
     try:
-        course = Course.objects.get(id=course_id)
+        course = Course.objects.get(id=course_id,deleted=False)
     except Course.DoesNotExist:
         return HttpResponse('Course does not exist')
 

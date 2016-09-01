@@ -23,6 +23,8 @@ class Course(models.Model):
 	teaching_assitant = models.ManyToManyField(users_models.User, related_name="teaching_assistant")
 	#订阅该课程用户
 	subscribed_user = models.ManyToManyField(users_models.User,related_name="subscribed_user")
+	#是否删除
+	deleted = models.BooleanField(default=False)
 	def __str__(self):
 	    return self.title
 	class Meta:

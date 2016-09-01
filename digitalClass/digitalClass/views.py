@@ -24,7 +24,7 @@ now = datetime.datetime.now()
 def homepage(request):
     # 不用登陆也能看到课程列表
     page_num = 12
-    courses = courses_models.Course.objects.all()
+    courses = courses_models.Course.objects.filter(deleted=False)
 	#get number of total page, use ceil function to ensure correction
     total_page = int(math.ceil(float(courses.count()) / page_num))
     print('================total_page', total_page)
