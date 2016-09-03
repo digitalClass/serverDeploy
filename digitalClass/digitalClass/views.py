@@ -408,7 +408,8 @@ def feedback(request):
 
 def thanks(request):
 	return render_to_response('thanks.html', {'logined': request.user.is_authenticated(), 'user_name':request.user.username})
-
+def building(request):
+	return render_to_response('building.html', {'logined': request.user.is_authenticated(), 'user_name':request.user.username})
 # why this does not work?
 def create(request):
     if request.user.user_role=="st":
