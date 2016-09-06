@@ -5,6 +5,7 @@ import glob
 from courses.models import PPTslice,PPTfile,Course
 import datetime
 from django.http import HttpResponseRedirect,Http404,HttpResponse
+from celery.task import task
 
 
 def create_thumbnail(img_path,save_dir=None,size=(128,128)):
@@ -21,7 +22,7 @@ def create_thumbnail(img_path,save_dir=None,size=(128,128)):
 		print(file_name)
 		im.save(os.path.join(save_dir,file_name) +'.thumbnail', 'JPEG')
 
-
+@task
 def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 	file, ext = os.path.splitext(pdf_path)
 	print file.split('/')[-3]
