@@ -43,13 +43,17 @@ def profile(request):
 
 	if user_role == 'te':
 	    course_list = user.teacher.filter(deleted=False)
+	    if request.method == 'POST':
+		course_id = int(request.POST['course_id'])
+		course = Course.objects.filter(id=course_id,deleted=False).update(deleted=True)
+		return HttpResponseRedirect('/accounts/profile/')
 	elif user_role == 'ta':
 	    return HttpResponseRedirect('')
 	 #Teaching Assistant's profile
 	else:
 	    #Student's profile
 	    course_list = user.subscribed_user.filter(deleted=False)
-        return render_to_response('users/profile.html',{"logined":logined,"user_name":user_name,"user_id":user_id,"user_role":user_role,"useravatar":useravatar, "course_list":course_list})
+        return render_to_response('users/profile.html',{"logined":logined,"user_name":user_name,"user_id":user_id,"user_role":user_role,"useravatar":useravatar, "course_list":course_list},context_instance=RequestContext(request))
     return render_to_response("premissionDeniey.html")
 
 @login_required
