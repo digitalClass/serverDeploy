@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'digitalClass',
     'djcelery',
     'kombu.transport.django',
+    'django_ajax',
 ]
 
 AUTH_USER_MODEL = 'users.User'

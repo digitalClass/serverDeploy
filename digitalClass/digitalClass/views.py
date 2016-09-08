@@ -17,6 +17,7 @@ from courses import models as courses_models
 from courses import views as courses_views
 from digitalClass import models as digital_models
 from django.core.mail import send_mail
+from django_ajax.decorators import ajax
 
 from users.models import User
 
@@ -440,15 +441,25 @@ def video(request, course_id, video_title):
 	video_comments = []
 	video_comments_data = []
 	try:
+		print('course')
 		course  = courses_models.Course.objects.get(id=course_id)
-		video = courses_models.Video.objects.get(course=course,\
-		title=video_title)
+#		print(course)
+		video = courses_models.Video.objects.filter(course=course,\
+		title=video_title)[1]
+#		print(video)
 		video_comments = comments_models.Video_Comment.objects.\
-		get(video=video)
+		filter(video=video)
 	except:
 		return HttpResponseRedirect('/404/')
 
 #	video comments data
+	video_data = {}
+	video_data['index'] = video.index
+	video_data['introduce'] = video.introduce
+	video_data['upload_time'] = video.upload_time
+	video_data['title'] = video.title
+	video_data['path'] = video.video_path
+
 	for vc in video_comments:
 		vc_data = {}
 		vc_data['date'] = vc.date
@@ -457,12 +468,19 @@ def video(request, course_id, video_title):
 		if user_avatar == '' or user_avatar =='NULL':
 			user_avatar = 'avatar/default.png'
 		vc_data['user_avatar'] = '/media/'+user_avatar
-		vc_data['content'] = content
+		vc_data['content'] = vc.content
 		video_comments_data.append(vc_data)
 
+	print('video_data')
+	print(video_data)
 	print('video_comments_data')
 	print(video_comments_data)
 
-	return render_to_response('video_player.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'video_comments_data': video_comments_data}, context_instance=RequestContext(request))
+	return render_to_response('video_player.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'video_data': video_data,'video_comments_data': video_comments_data}, context_instance=RequestContext(request))
 
 	return render_to_response('video_player.html')
+
+@ajax
+def add_video_comment(request):
+	#TODO: write data to database,return result.
+	return {'result': 0}
