@@ -72,3 +72,15 @@ class Answer_Vote(models.Model):
 	answer = models.ForeignKey(Answer, null=True)
 	user = models.ForeignKey(users_models.User, null=True)
 
+class Video_Comment(models.Model):
+	""" comment model in video player page."""
+	date = models.DateTimeField()
+	video = models.ForeignKey(courses_models.Video, null=True)
+	user = models.ForeignKey(users_models.User, null=True)
+	content = models.CharField(max_length=1024)
+
+	def __unicode__(self):
+		return self.content
+	
+	
+

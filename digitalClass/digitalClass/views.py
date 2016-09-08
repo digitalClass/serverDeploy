@@ -429,3 +429,40 @@ def courses(request):
 
 def page_404(request):
 	return render_to_response('404.html')
+
+def video(request, course_id, video_title):
+	try:
+		course_id = int(course_id)
+	except ValueError:
+		return HttpResponseRedirect('/404/')
+	course = []
+	video = None
+	video_comments = []
+	video_comments_data = []
+	try:
+		course  = courses_models.Course.objects.get(id=course_id)
+		video = courses_models.Video.objects.get(course=course,\
+		title=video_title)
+		video_comments = comments_models.Video_Comment.objects.\
+		get(video=video)
+	except:
+		return HttpResponseRedirect('/404/')
+
+#	video comments data
+	for vc in video_comments:
+		vc_data = {}
+		vc_data['date'] = vc.date
+		vc_data['user_name'] = vc.user.username
+		user_avatar = vc.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL':
+			user_avatar = 'avatar/default.png'
+		vc_data['user_avatar'] = '/media/'+user_avatar
+		vc_data['content'] = content
+		video_comments_data.append(vc_data)
+
+	print('video_comments_data')
+	print(video_comments_data)
+
+	return render_to_response('video_player.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'video_comments_data': video_comments_data}, context_instance=RequestContext(request))
+
+	return render_to_response('video_player.html')
