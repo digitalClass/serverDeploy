@@ -9,6 +9,7 @@ from courses.filetype import *
 from django.template import RequestContext
 from digitalClass.utils import *
 import os
+import shutil
 
 import datetime
 # Create your views here.
@@ -46,7 +47,8 @@ def profile(request):
 	    if request.method == 'POST':
 		course_id = int(request.POST['course_id'])
 		course = Course.objects.filter(id=course_id,deleted=False).update(deleted=True)
-		return HttpResponseRedirect('/accounts/profile/')
+		#return HttpResponseRedirect('/accounts/profile/')
+		return HttpResponseRedirect('')
 	elif user_role == 'ta':
 	    return HttpResponseRedirect('')
 	 #Teaching Assistant's profile
@@ -149,13 +151,16 @@ def course_page(request, c_id):
 	if s:
 	    Is_subscribed = True
         if request.method == 'POST':
-	    if request.POST['subscribed_status_changed']==u'True':
+	    if request.POST.get('subscribed_status_changed',''):
 		if Is_subscribed:
 		    course.subscribed_user.remove(request.user)
 		    Is_subscribed = False
 		else:
 		    course.subscribed_user.add(request.user)
 		    Is_subscribed = True
+	    if request.POST.get('delete_ppt_id',''):
+		delete_pptfile(request.POST['delete_ppt_id'])
+		return HttpResponseRedirect('')
         context = {'logined':logined,
                 'user_name':request.user.username,
                 'user_role':request.user.user_role,
@@ -163,51 +168,12 @@ def course_page(request, c_id):
                 'ppts':ppts,
                 'Is_this_course_teacher':Is_this_course_teacher,
                 'Is_subscribed':Is_subscribed,}
+	print request.POST
         return render_to_response('course.html',context,context_instance=RequestContext(request))
     else:
 	if request.method == 'POST':
 	    return HttpResponseRedirect('/accounts/login/')
     return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed})
-
-def course_test(request, c_id):
-    #course page
-    #courses' information,ppt list are needed
-    #Is_this_course_teacher
-    try:
-	course_id = int(c_id)
-    except ValueError:
-	raise Http404()
-    try:
-        course = Course.objects.get(id=course_id)
-    except Course.DoesNotExist:
-	return HttpResponse('Course does not exist')
-    ppts = course.pptfile_set.all()
-    Is_this_course_teacher = False
-    Is_subscribed = False
-
-    if request.user.is_authenticated():
-	user_id = request.user.id
-	u = course.teacher.filter(id=user_id)
-	if u:
-	    Is_this_course_teacher=True
-	s = course.subscribed_user.filter(id=user_id)
-	if s:
-	    Is_subscribed = True
-        if request.method == 'POST':
-	    if request.POST['subscribed_status_changed']==u'True':
-		if Is_subscribed:
-		    course.subscribed_user.remove(request.user)
-		    Is_subscribed = False
-		else:
-		    course.subscribed_user.add(request.user)
-		    Is_subscribed = True
-    else:
-	if request.method == 'POST':
-	    return HttpResponseRedirect('/accounts/login/')
-    return render_to_response('test_course/course_page.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed},context_instance=RequestContext(request))
-
-
-
 
 @login_required
 def ppt_upload(request,c_id):
@@ -282,6 +248,22 @@ def handle_upload_file(f,course_id,title):
     return file_name
 
 
-
+def delete_pptfile(ppt_id):
+    #从数据库和服务器中删除ppt及其对应的pptslice
+    ppt = PPTfile.objects.get(id=int(ppt_id))
+    if ppt:
+	ppt.pptslice_set.all().delete()
+    course_id = ppt.course.id
+    title = ppt.title
+    pptpath = "/media/digitalClass/ppts/%d/%s/"%(course_id,title)
+    videopath = ""
+    try:
+	shutil.rmtree(pptpath)
+	#shutil.rmtree(videopath)
+	ppt.delete()
+	print "{}\'s files have been deleted".format(title)	
+    except Exception, e:
+	print e
+	
 
 
