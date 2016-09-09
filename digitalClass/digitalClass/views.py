@@ -445,13 +445,15 @@ def video(request, course_id, video_title):
 		course  = courses_models.Course.objects.get(id=course_id)
 #		print(course)
 		video = courses_models.Video.objects.filter(course=course,\
-		title=video_title)[1]
+		title=video_title)[0]
 #		print(video)
 		video_comments = comments_models.Video_Comment.objects.\
 		filter(video=video)
 	except:
 		return HttpResponseRedirect('/404/')
 
+	course_data = {}
+	course_data['id'] = course_id
 #	video comments data
 	video_data = {}
 	video_data['index'] = video.index
@@ -476,11 +478,37 @@ def video(request, course_id, video_title):
 	print('video_comments_data')
 	print(video_comments_data)
 
-	return render_to_response('video_player.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'video_data': video_data,'video_comments_data': video_comments_data}, context_instance=RequestContext(request))
+	return render_to_response('video_player.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'course_data':course_data,'video_data': video_data,'video_comments_data': video_comments_data}, context_instance=RequestContext(request))
 
 	return render_to_response('video_player.html')
 
 @ajax
 def add_video_comment(request):
-	#TODO: write data to database,return result.
-	return {'result': 0}
+	if  request.method == 'POST':
+		now = datetime.datetime.now()
+		course_id = int(request.POST['course_id'])
+		video_name = request.POST['video_name']
+		content = request.POST['content']
+		course = courses_models.Course.objects.get(id=course_id)
+		video = courses_models.Video.objects.filter(course=course,title=video_name)[0]
+		new_vc = comments_models.Video_Comment(date=now,
+		video=video,user=request.user,content=content)
+		new_vc.save()
+
+		vc_data = {}
+		vc_data['date'] = now
+		vc_data['user_name'] = request.user.username
+		user_avatar = request.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL':
+			user_avatar = 'avatar/default.png'
+		user_avatar = '/media/'+user_avatar
+		vc_data['content'] = content
+
+
+		return {'result': 0, 'date':str(now),'user_name': request.user.username,
+		'user_avatar': user_avatar, 'content':content}
+		#return {'result': 0}
+
+	else:
+		return {'result': 0}
+
