@@ -82,5 +82,13 @@ class Video_Comment(models.Model):
 	def __unicode__(self):
 		return self.content
 	
+class Discuss_Comment(models.Model):
+	""" comment model in discuss page."""
+	date = models.DateTimeField()
+	user = models.ForeignKey(users_models.User, null=True)
+	content = models.CharField(max_length=1024)
+
+	def __unicode__(self):
+		return self.content
 	
 

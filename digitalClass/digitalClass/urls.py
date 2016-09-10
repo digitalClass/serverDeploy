@@ -39,6 +39,8 @@ urlpatterns = [
     url(r'^addvote/$', digitalClass_views.add_vote),
     url(r'^page_change/$', digitalClass_views.page_change),
     url(r'^add_video_comment/$', digitalClass_views.add_video_comment),
+    url(r'^discuss/$', digitalClass_views.discuss),
+    url(r'^add_discuss_comment/$', digitalClass_views.add_discuss_comment),
 ]
 
 urlpatterns += [

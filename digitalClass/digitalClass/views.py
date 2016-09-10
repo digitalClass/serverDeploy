@@ -512,3 +512,44 @@ def add_video_comment(request):
 	else:
 		return {'result': 0}
 
+def discuss(request):
+	content_list = comments_models.Discuss_Comment.objects.filter()
+	discuss_data = []
+	for content in content_list:
+		d_data = {}
+		d_data['date'] = content.date
+		d_data['user_name'] = content.user
+		user_avatar = content.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL':
+			user_avatar = 'avatar/default.png'
+		user_avatar = '/media/'+user_avatar
+		d_data['user_avatar'] = user_avatar
+		d_data['content'] = content.content
+		discuss_data.append(d_data)
+
+	return render_to_response('discuss.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'discuss_data': discuss_data},context_instance=RequestContext(request))
+
+
+@ajax
+def add_discuss_comment(request):
+	if  request.method == 'POST':
+		now = datetime.datetime.now()
+		content = request.POST['content']
+		new_dc = comments_models.Discuss_Comment(date=now,
+		user=request.user,content=content)
+		new_dc.save()
+
+		user_avatar = request.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL':
+			user_avatar = 'avatar/default.png'
+		user_avatar = '/media/'+user_avatar
+
+		return {'result': 0, 'date':str(now),'user_name': request.user.username,
+		'user_avatar': user_avatar, 'content':content}
+
+	else:
+		return {'result': 0}
+
+
+		
+
