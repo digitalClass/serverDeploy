@@ -551,5 +551,11 @@ def add_discuss_comment(request):
 		return {'result': 0}
 
 
+def about(request):
+	return render_to_response('about.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
+
 		
+
+def contact(request):
+	return render_to_response('contact.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
 
