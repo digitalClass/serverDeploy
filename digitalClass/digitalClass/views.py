@@ -25,7 +25,7 @@ now = datetime.datetime.now()
 def homepage(request):
     # 不用登陆也能看到课程列表
     page_num = 12
-    courses = courses_models.Course.objects.filter(deleted=False)
+    courses = courses_models.Course.objects.order_by('-create_time').filter(deleted=False)
 	#get number of total page, use ceil function to ensure correction
     total_page = int(math.ceil(float(courses.count()) / page_num))
     print('================total_page', total_page)
@@ -513,7 +513,7 @@ def add_video_comment(request):
 		return {'result': 0}
 
 def discuss(request):
-	content_list = comments_models.Discuss_Comment.objects.filter()
+	content_list = comments_models.Discuss_Comment.objects.order_by('-date').filter()
 	discuss_data = []
 	for content in content_list:
 		d_data = {}
