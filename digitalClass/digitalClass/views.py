@@ -355,7 +355,7 @@ def page_change(request):
 		page_id = int(request.POST['page_id'])
 		begin_num = (page_id - 1) * page_num
 		end_num = (page_id) * page_num
-		all_courses = courses_models.Course.objects.all().order_by('id')
+		all_courses = courses_models.Course.objects.order_by('-create_time').filter(deleted=False)
 		total_num = all_courses.count()
 		if total_num < end_num:
 			end_num = total_num
@@ -364,10 +364,10 @@ def page_change(request):
 		courses_data = []
 		for cc in curr_courses:
 			cc_data = {}
-			cc_data['id'] = cc.id
+			cc_data['id'] = cc.course_id
 			cc_data['title'] = cc.title
 			#transfer the datetime object to string and remove its hh:mm:ss
-			cc_data['create_time'] = str(cc.create_time).split(' ')[0]
+			cc_data['create_time'] = str(cc.create_time).split('+')[0]
 			cc_data['teacher_name'] = cc.teacher_name
 			courses_data.append(cc_data)
 			code = '0'
