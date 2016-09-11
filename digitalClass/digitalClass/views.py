@@ -365,7 +365,7 @@ def page_change(request):
 		for cc in curr_courses:
 			cc_data = {}
 			cc_data['id'] = cc.id
-			cc_data['cousre_id'] = cc.course_id
+			cc_data['course_id'] = cc.course_id
 			cc_data['title'] = cc.title
 			#transfer the datetime object to string and remove its hh:mm:ss
 			cc_data['create_time'] = str(cc.create_time).split('+')[0]
@@ -484,6 +484,7 @@ def video(request, course_id, video_title):
 	return render_to_response('video_player.html')
 
 @ajax
+@login_required
 def add_video_comment(request):
 	if  request.method == 'POST':
 		now = datetime.datetime.now()
@@ -513,6 +514,7 @@ def add_video_comment(request):
 	else:
 		return {'result': 0}
 
+
 def discuss(request):
 	content_list = comments_models.Discuss_Comment.objects.order_by('-date').filter()
 	discuss_data = []
@@ -532,6 +534,7 @@ def discuss(request):
 
 
 @ajax
+@login_required
 def add_discuss_comment(request):
 	if  request.method == 'POST':
 		now = datetime.datetime.now()
