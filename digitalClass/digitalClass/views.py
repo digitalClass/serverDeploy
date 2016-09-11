@@ -559,3 +559,6 @@ def about(request):
 def contact(request):
 	return render_to_response('contact.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
 
+def all(request):
+	return render_to_response('homepage.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
+

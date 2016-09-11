@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^add_discuss_comment/$', digitalClass_views.add_discuss_comment),
     url(r'^about/$', digitalClass_views.about),
     url(r'^contact/$', digitalClass_views.contact),
+    url(r'^homepage/$', digitalClass_views.all),
 ]
 
 urlpatterns += [
