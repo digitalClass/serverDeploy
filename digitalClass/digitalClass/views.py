@@ -364,7 +364,8 @@ def page_change(request):
 		courses_data = []
 		for cc in curr_courses:
 			cc_data = {}
-			cc_data['id'] = cc.course_id
+			cc_data['id'] = cc.id
+			cc_data['cousre_id'] = cc.course_id
 			cc_data['title'] = cc.title
 			#transfer the datetime object to string and remove its hh:mm:ss
 			cc_data['create_time'] = str(cc.create_time).split('+')[0]
