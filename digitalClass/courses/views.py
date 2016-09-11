@@ -10,53 +10,74 @@ from django.template import RequestContext
 from digitalClass.utils import *
 import os
 import shutil
-
 import datetime
-# Create your views here.
+
 
 @login_required
 def profile(request):
-    #profile, login required
-    #authenticated -> get basic information from request.user
-    #three part,request.user.user_role,only teacher's part now
-    #if user is a teacher
-	#get User object according to id
-	#related_name='teacher'Course and User has a ManyToMany table
-	#return course list
-    #a teaching assistant
-    #a student
-    #not authenticated->redirect to somewhere
-    logined =False
-    if request.user.is_authenticated():
-        logined = True
-        user_email = request.user.email
-        user_name = request.user.username
-        user_id = request.user.id
-        if request.user.useravatar:
-	    useravatar = request.user.useravatar
-        else: useravatar = 'avatar/default.png'
-        # te:Teacher;ta:TeachAssisstant;st:Student
-        user_role = request.user.user_role
-	try:
-	    user = User.objects.get(id=user_id)
-	except User.DoesNotExist:
-	    return HttpResponse('something wrong!')
+    '''
+    生成个人主页
+    已登陆用户访问个人主页，request中需要有用户登陆信息，方法需要登陆才可使用
 
-	if user_role == 'te':
-	    course_list = user.teacher.filter(deleted=False)
-	    if request.method == 'POST':
-		course_id = int(request.POST['course_id'])
-		course = Course.objects.filter(id=course_id,deleted=False).update(deleted=True)
-		#return HttpResponseRedirect('/accounts/profile/')
-		return HttpResponseRedirect('')
-	elif user_role == 'ta':
+    Args:
+	request: request请求
+
+    Returns:
+	render_to_response(
+	    'users/profile.html',
+	    context,
+	    context_instance=RequestContext(request))
+	
+        context = {
+	    "logined":logined,
+	    "user_name":user_name,
+	    "user_id":user_id,
+	    "user_role":user_role,
+	    "useravatar":useravatar, 
+	    "course_list":course_list,}
+
+    '''	
+    logined = True
+    user = request.user
+    user_email = user.email
+    user_name = user.username
+    user_id = user.id
+    if user.useravatar:
+	useravatar = user.useravatar
+    else: useravatar = 'avatar/default.png'
+    user_role = user.user_role
+    # te:Teacher; ta:TeachAssistant; st:Student
+    # Generate user's profile according to its user_role
+    # course_list differs with user_role:
+    #     teatcher: the course created by this user
+    #     student: the course subscribed by this user
+    # Teaching assistant's part has not been finished
+    if user_role == 'te':
+	course_list = user.teacher.filter(deleted=False)
+	if request.method == 'POST': 
+	    course_id = int(request.POST['course_id'])
+	    course = Course.objects.get(id=course_id,deleted=False)
+	    ppts = course.pptfile_set.all()
+	    for ppt in ppts:
+		delete_pptfile(ppt.id) #  Delete all of the ppts in this course
+            course.deleted=True
+            course.save()
 	    return HttpResponseRedirect('')
-	 #Teaching Assistant's profile
-	else:
-	    #Student's profile
-	    course_list = user.subscribed_user.filter(deleted=False)
-        return render_to_response('users/profile.html',{"logined":logined,"user_name":user_name,"user_id":user_id,"user_role":user_role,"useravatar":useravatar, "course_list":course_list},context_instance=RequestContext(request))
-    return render_to_response("premissionDeniey.html")
+    elif user_role == 'ta':
+	return HttpResponseRedirect('')
+    else:	#user_role == 'st'
+	course_list = user.subscribed_user.filter(deleted=False)
+
+    # This part is to deal with replies of user's questions, answers and 
+    #     comments.
+    context = {
+	"logined":logined,
+	"user_name":user_name,
+	"user_id":user_id,
+	"user_role":user_role,
+	"useravatar":useravatar, 
+	"course_list":course_list,}
+    return render_to_response('users/profile.html',context,context_instance=RequestContext(request))
 
 @login_required
 def create_course(request):
