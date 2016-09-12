@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'djcelery',
     'kombu.transport.django',
     'django_ajax',
+    'notifications',
 ]
 
 AUTH_USER_MODEL = 'users.User'

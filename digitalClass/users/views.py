@@ -17,6 +17,8 @@ from .signals import user_activated, user_registered
 from .utils import EmailActivationTokenGenerator, send_activation_email
 from django.shortcuts import render_to_response
 
+from notifications.signals import notify
+
 try:
     from django.contrib.sites.shortcuts import get_current_site
 except ImportError:  # pragma: no cover
@@ -265,6 +267,8 @@ def password_change(request,
             # is enabled.
             update_session_auth_hash(request, form.user)
             # return redirect(post_change_redirect)
+            notify.send(request.user, recipient=request.user, verb='you have change your password.',logined=True,
+                user_name=request.user.username)
             return TemplateResponse(request, 'users/password_change_done.html', {'logined': True, 'user_name':request.user.username})
     else:
         form = password_change_form(user=request.user)

@@ -19,6 +19,8 @@ from digitalClass import models as digital_models
 from django.core.mail import send_mail
 from django_ajax.decorators import ajax
 
+from notifications.signals import notify
+
 from users.models import User
 
 now = datetime.datetime.now()
@@ -40,7 +42,7 @@ def homepage(request):
 		'page_num': page_num, 'page_num_list': range(1,total_page+1)})
     else:
         return render_to_response("index.html",{"logined": False,"courses":courses[:page_num],'curpage':1, 'total_page': total_page,'page_num': page_num, 'page_num_list': range(1, total_page+1)})
-		
+
 
 @login_required
 def profile(request,
@@ -105,7 +107,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 #	for i in range(len(teachers)):
 #		teacher_data.append(teachers[i].username)
 #	course_data['teacher'] = teacher_data
-	course_data['teacher'] = course.teacher_name 
+	course_data['teacher'] = course.teacher_name
 
 	tas = course.teaching_assitant.all()
 	tas_data = []
@@ -282,7 +284,7 @@ def add_comments(request):
 		answer_id = int(request.POST['answer_id'])
 		course_id = int(request.POST['course_id'])
 		ppt_file_title = urllib.unquote(request.POST['ppt_file_title'])
-		#change the unicode type variable to str variable 
+		#change the unicode type variable to str variable
 		ppt_file_title = ppt_file_title.encode('latin-1')
 		ppt_slice_id = int(request.POST['ppt_slice_id'])
 
@@ -316,6 +318,10 @@ def add_comments(request):
 			new_answer_id = new_answer.id
 			code = 0
 			msg = ''
+
+                        # notify.send(request.user, recipient=question.user, verb='replied the question:')
+                        notify.send(request.user, recipient=question.user, verb='回复了您的提问:',
+                            action_object=question,description=question.content)
 
 		#comment on a quesiton
 		elif answer_id == -1:
@@ -373,7 +379,7 @@ def page_change(request):
 			courses_data.append(cc_data)
 			code = '0'
 			msg = ''
-		
+
 		print('course:')
 		print(courses_data)
 		print('item_count:')
@@ -386,7 +392,7 @@ def page_change(request):
 		return HttpResponse(json.dumps({'code':0, 'msg': ''}), content_type= \
 		"application/json")
 
-	
+
 def feedback(request):
 	if request.method == "POST":
 		user = request.user
@@ -558,7 +564,7 @@ def add_discuss_comment(request):
 def about(request):
 	return render_to_response('about.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
 
-		
+
 
 def contact(request):
 	return render_to_response('contact.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
