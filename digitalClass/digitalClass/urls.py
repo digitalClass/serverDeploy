@@ -18,9 +18,10 @@ from django.contrib import admin
 from django.contrib.auth import urls
 from digitalClass import views as digitalClass_views
 from django.conf import settings
-from django.conf.urls import patterns
+# from django.conf.urls import patterns
 from courses import views as courses_views
 from django.views.static import serve
+import notifications.urls
 
 urlpatterns = [
     url(r'^$', digitalClass_views.homepage),
@@ -58,6 +59,10 @@ urlpatterns += [
 urlpatterns += [
     url(r'^404/$', digitalClass_views.page_404),
 ]
+
+urlpatterns += [
+        url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
+        ]
 
 if settings.DEBUG:
     # static files (images, css, javascript, etc.)
