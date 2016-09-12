@@ -10,7 +10,6 @@ from django.template import RequestContext
 from digitalClass.utils import *
 import os
 import shutil
-import datetime
 
 
 @login_required
@@ -81,40 +80,59 @@ def profile(request):
 
 @login_required
 def create_course(request):
-    #authenticated
-    #is a teacher?
-    #method = POST?
-    #CreateCourseForm
-    #is it valid?
-    #a default image path is needed
-    #has priority
-	#timing
-	#introduce
-	#img_path
-	#user_id
-	#Course.save()
-	#add Course.teacher
-    #else -> redirect
-    logined = False
-    if request.user.is_authenticated():
-        logined = True
-	if request.user.user_role == 'te':
-	    if request.method == 'POST':
-		form = CreateCourseForm(request.POST)
-		if form.is_valid():
-		    f = form.cleaned_data
-		    now = datetime.datetime.now()
-		    img = ''
-		    user_id = request.user.id
-		    course = Course.objects.create(introduce=f['course_data'], create_time=now, img_path=img, title=f['course_title'], course_id = f['course_id'], teacher_name=f['course_teacher'])
-		    u = User.objects.get(id=user_id)
-		    course.teacher.add(u)
-		    return HttpResponseRedirect('/accounts/profile/')
-	    else:
-		#form = CreateCourseForm({'course_title':'课程名称', 'course_id':'课程编号', 'course_teacher':'任课老师'})
-		form = CreateCourseForm()
-            return render_to_response('create.html',{'form':form,"logined":logined,"user_name":request.user.username},context_instance=RequestContext(request))
-    return render_to_response("premissionDeniey.html")
+    '''
+    创建课程
+    教师可以创建课程，教师身份才可以访问，其他身份会跳转至个人主页
+
+    Args: 
+        request
+        request.POST
+        request.user
+        form = {
+            course_title,
+            course_id,
+            course_teacher,
+            course_data}
+
+    Return: 
+        render_to_response(
+            'create.html',
+            context,
+            context_instance=RequestContext(request))
+
+        context = {
+            'form':form,
+            'logined':logined,
+            'user_name':user_name,}
+    '''
+    logined = True
+    user_id = request.user.id
+    user_name = request.user.username
+    if request.user.user_role == 'te':
+        if request.method == 'POST':
+            form = CourseForm(request.POST)
+            # if the form data is valid, create course
+            # and return to profile
+	    if form.is_valid():
+	        f = form.cleaned_data
+	        img = ''
+	        course = Course.objects.create(
+                    introduce=f['course_data'], 
+                    img_path=img, 
+                    title=f['course_title'], 
+                    course_id = f['course_id'], 
+                    teacher_name=f['course_teacher'])
+	        u = User.objects.get(id=user_id)
+	        course.teacher.add(u)
+	        return HttpResponseRedirect('/accounts/profile/')
+	else:
+	    form = CourseForm()
+        context = {
+            'form':form,
+            'logined':logined,
+            'user_name':user_name,}
+        return render_to_response('create.html',context,context_instance=RequestContext(request))
+    return HttpResponseRedirect('/accounts/profile/') 
 
 @login_required
 def course_edit(request, c_id):
@@ -130,7 +148,7 @@ def course_edit(request, c_id):
 	teacher = course.teacher.filter(id = request.user.id)
 	if teacher:
 	    if request.method == 'POST':
-		form = EditCourseForm(request.POST)
+		form = CourseForm(request.POST)
 		if form.is_valid():
 		    f = form.cleaned_data
 		    course.title = f['course_title']
@@ -140,7 +158,7 @@ def course_edit(request, c_id):
 		    course.save()
 		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
-		form = EditCourseForm({'course_title':course.title, 'course_id':course.course_id, 'course_data':course.introduce})
+		form = CourseForm({'course_title':course.title, 'course_id':course.course_id, 'course_data':course.introduce})
     	    return render_to_response('create.html',{'form':form},context_instance=RequestContext(request))
     return HttpResponse('You aren\'t not the teacher of this course, you can\'t edit its infomation!')
 
@@ -231,7 +249,7 @@ def ppt_upload(request,c_id):
 			#return HttpResponse(ftype)
 		        #return HttpResponse("You have to upload a pdf file.")
 			return render_to_response('test_course/ppt_upload_fail_type.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
-		    ppt = PPTfile.objects.create(title=ppt_title,upload_time=datetime.datetime.now(),introduce=f['data'],source=fname,course_id=course_id)
+		    ppt = PPTfile.objects.create(title=ppt_title,introduce=f['data'],source=fname,course_id=course_id)
 		    if course.img_path=='':
 		    	split_pdf.delay(fname,course_id,ppt_title,True)
 		    	#split_pdf(fname,course_id,ppt_title,True)
