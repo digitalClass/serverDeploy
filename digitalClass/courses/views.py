@@ -283,7 +283,7 @@ def course_page(request, c_id):
         'ppts':ppts,
         'Is_this_course_teacher':Is_this_course_teacher,
         'Is_subscribed':Is_subscribed,}
-    return response(request,'course.html',context)
+    return render(request,'course.html',context)
 
 @login_required
 def ppt_upload(request,c_id):
