@@ -3,7 +3,6 @@ import os
 import subprocess
 import glob
 from courses.models import PPTslice,PPTfile,Course
-import datetime
 from django.http import HttpResponseRedirect,Http404,HttpResponse
 from celery.task import task
 
@@ -30,7 +29,6 @@ def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 		save_dir = os.path.split(pdf_path)[0]
 	try:
 		subprocess.call(['convert', '-verbose',  pdf_path, '-quality', '100', save_dir+'/%d.jpg'])
-		now = datetime.datetime.now()
 		course = Course.objects.get(id=course_id)
 		pptfile = course.pptfile_set.filter(title=ppt_title)
 		for pptslice in glob.glob(os.path.join(save_dir,"*.jpg")):
@@ -38,7 +36,7 @@ def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 			name = os.path.split(pptslice)[1].split('.')[0]
 			index = int(name)+1
 			if pptfile:
-				ppt = PPTslice.objects.create(index=index, upload_time=now, img_path=ppt_url_path, pptfile=pptfile[0])
+				ppt = PPTslice.objects.create(index=index, img_path=ppt_url_path, pptfile=pptfile[0])
 		if create_img:
 			pardir = os.path.join(save_dir, os.pardir)
 			create_thumbnail(os.path.join(save_dir,'0.jpg'),save_dir=pardir)

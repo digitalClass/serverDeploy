@@ -24,7 +24,7 @@ from django.views.static import serve
 import notifications.urls
 
 urlpatterns = [
-    url(r'^$', digitalClass_views.homepage),
+    url(r'^$', digitalClass_views.index),
     url(r'^admin/', admin.site.urls),
 # app users
     url(r'^accounts/logout$',digitalClass_views.logout_user),
@@ -44,7 +44,7 @@ urlpatterns = [
     url(r'^add_discuss_comment/$', digitalClass_views.add_discuss_comment),
     url(r'^about/$', digitalClass_views.about),
     url(r'^contact/$', digitalClass_views.contact),
-    url(r'^homepage/$', digitalClass_views.all),
+    url(r'^course/$', digitalClass_views.homepage),
 ]
 
 urlpatterns += [
