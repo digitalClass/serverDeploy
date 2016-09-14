@@ -1,5 +1,5 @@
 #coding:utf-8
-from django.shortcuts import render,render_to_response
+from django.shortcuts import render,render_to_response,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect,Http404,HttpResponse
 from courses.models import Course, PPTfile, PPTslice
@@ -23,10 +23,10 @@ def profile(request):
 	request: request请求
 
     Returns:
-	render_to_response(
+	render(
+            request
 	    'users/profile.html',
 	    context,
-	    context_instance=RequestContext(request))
 
         context = {
 	    "logined":logined,
@@ -77,7 +77,7 @@ def profile(request):
 	"user_role":user_role,
 	"useravatar":useravatar,
 	"course_list":course_list,}
-    return render_to_response('users/profile.html',context,context_instance=RequestContext(request))
+    return render(request,'users/profile.html',context)
 
 @login_required
 def create_course(request):
@@ -96,10 +96,10 @@ def create_course(request):
             course_data}
 
     Return:
-        render_to_response(
+        response(
+            request
             'create.html',
             context,
-            context_instance=RequestContext(request))
 
         context = {
             'form':form,
@@ -132,7 +132,7 @@ def create_course(request):
             'form':form,
             'logined':logined,
             'user_name':user_name,}
-        return render_to_response('create.html',context,context_instance=RequestContext(request))
+        return render(request,'create.html',context)
     return HttpResponseRedirect('/accounts/profile/')
 
 @login_required
@@ -160,47 +160,39 @@ def course_edit(request, c_id):
 		    return HttpResponseRedirect('/accounts/profile/')
 	    else:
 		form = CourseForm({'course_title':course.title, 'course_id':course.course_id, 'course_data':course.introduce})
-    	    return render_to_response('create.html',{'form':form},context_instance=RequestContext(request))
+    	    return render(request,'create.html',{'form':form})
     return HttpResponse('You aren\'t not the teacher of this course, you can\'t edit its infomation!')
 
 
 def course_page(request, c_id):
-    #course page
-    #courses' information,ppt list are needed
-    #Is_this_course_teacher
-    try:
-	course_id = int(c_id)
-    except ValueError:
-	raise Http404()
-    try:
-        course = Course.objects.get(id=course_id,deleted=False)
-    except Course.DoesNotExist:
-	return HttpResponse('Course does not exist')
-    ppts = course.pptfile_set.all()
-    Is_this_course_teacher = False
-    Is_subscribed = False
+    '''
+    课程页面
+    每个课程有自己的页面，无需登陆即可访问，实现四种功能
+    1.匿名访问课程页面
+    Args:
+        requset
+        c_id 课程编号，由url取得，为字符串
 
-    logined = False
-    if request.user.is_authenticated():
-        logined = True
-	user_id = request.user.id
-	u = course.teacher.filter(id=user_id)
-	if u:
-	    Is_this_course_teacher=True
-	s = course.subscribed_user.filter(id=user_id)
-	if s:
-	    Is_subscribed = True
-        if request.method == 'POST':
-	    if request.POST.get('subscribed_status_changed',''):
-		if Is_subscribed:
-		    course.subscribed_user.remove(request.user)
-		    Is_subscribed = False
-		else:
-		    course.subscribed_user.add(request.user)
-		    Is_subscribed = True
-	    if request.POST.get('delete_ppt_id',''):
-		delete_pptfile(request.POST['delete_ppt_id'])
-		return HttpResponseRedirect('')
+    Return:
+        render(request,'course.html',context)
+        context = {
+            'logined':logined,
+            'course':course,
+            'ppts':ppts,
+            'Is_this_course_teacher':Is_this_course_teacher,
+            'Is_subscribed':Is_subscribed,}
+
+    2.登陆下访问课程页面
+    Args:
+        request
+        request.user
+        c_id
+
+    Return:
+        render(
+            request
+            'course.html',
+            context,
         context = {'logined':logined,
                 'user_name':request.user.username,
                 'user_role':request.user.user_role,
@@ -208,12 +200,90 @@ def course_page(request, c_id):
                 'ppts':ppts,
                 'Is_this_course_teacher':Is_this_course_teacher,
                 'Is_subscribed':Is_subscribed,}
-	print request.POST
-        return render_to_response('course.html',context,context_instance=RequestContext(request))
+
+    3.学生订阅课程
+    Args:
+        request
+        request.POST['subscribed_status_changed']
+        request.user
+        c_id
+
+    Return:
+        render(
+            request
+            'course.html',
+            context,
+        context = {'logined':logined,
+                'user_name':request.user.username,
+                'user_role':request.user.user_role,
+                'course':course,
+                'ppts':ppts,
+                'Is_this_course_teacher':Is_this_course_teacher,
+                'Is_subscribed':Is_subscribed,}
+
+    4.开课老师删除课件或视频
+    Args:
+        request
+        request.POST['delete_ppt_id']
+        request.user
+        c_id
+
+    Return:
+        return HttpResponseRedirect('')
+
+    '''
+    course = get_object_or_404(Course,id=int(c_id),deleted=False)
+    ppts = course.pptfile_set.all()
+    Is_this_course_teacher = False
+    Is_subscribed = False
+    logined = False
+
+    if request.user.is_authenticated(): 
+        logined = True
+	user_id = request.user.id
+        # To detemine if user is a teacher of this course
+	u = course.teacher.filter(id=user_id) 
+	if u:
+	    Is_this_course_teacher=True
+        # To detemine if the logined user is a subscribed user of this course
+	s = course.subscribed_user.filter(id=user_id)
+	if s:
+	    Is_subscribed = True
+        if request.method == 'POST':
+            # To change the subscription status
+	    if request.POST.get('subscribed_status_changed',''):
+		if Is_subscribed:
+		    course.subscribed_user.remove(request.user)
+		    Is_subscribed = False
+		else:
+		    course.subscribed_user.add(request.user)
+		    Is_subscribed = True
+            # To delete one of its ppts or videos
+            # Warning:This can only be applied by the creator
+	    if request.POST.get('delete_ppt_id','') and Is_this_course_teacher:
+		delete_pptfile(request.POST['delete_ppt_id'])
+            elif request.POST.get('delete_video_id',''):
+                delete_video(request.POST['delete_video_id'])
+            return HttpResponseRedirect('')
+        context = {'logined':logined,
+                'user_name':request.user.username,
+                'user_role':request.user.user_role,
+                'course':course,
+                'ppts':ppts,
+                'Is_this_course_teacher':Is_this_course_teacher,
+                'Is_subscribed':Is_subscribed,}
+	#print request.POST
+        return render(request,'course.html',context)
     else:
 	if request.method == 'POST':
 	    return HttpResponseRedirect('/accounts/login/')
-    return render_to_response('course.html',{'course':course, 'ppts':ppts, 'Is_this_course_teacher':Is_this_course_teacher, 'Is_subscribed':Is_subscribed})
+    context = {
+        'logined':logined,
+        'course':course,
+        'ppts':ppts,
+        'Is_this_course_teacher':Is_this_course_teacher,
+        'Is_subscribed':Is_subscribed,}
+    return response(request,'course.html',context)
 
 @login_required
 def ppt_upload(request,c_id):
@@ -229,7 +299,8 @@ def ppt_upload(request,c_id):
         course = Course.objects.get(id=course_id,deleted=False)
     except Course.DoesNotExist:
         return HttpResponse('Course does not exist')
-
+    #course = get_object_or_404(Course,id=int(c_id),deleted=False)
+    ppts = course.pptfile_set.all()
     logined = False
     if request.user.is_authenticated():
         logined = True
@@ -300,7 +371,6 @@ def delete_pptfile(ppt_id):
     course_id = ppt.course.id
     title = ppt.title
     pptpath = "/media/digitalClass/ppts/%d/%s/"%(course_id,title)
-    videopath = ""
     try:
 	shutil.rmtree(pptpath)
 	#shutil.rmtree(videopath)
@@ -309,5 +379,16 @@ def delete_pptfile(ppt_id):
     except Exception, e:
 	print e
 
-
+def delete_video(video_id):
+    video = Video.objects.get(id=int(video_id))
+    course_id = video.course.id
+    title = video.title
+    pptpath = "/media/digitalClass/video/%d/%s/"%(course_id,title)
+    try:
+	shutil.rmtree(pptpath)
+	#shutil.rmtree(videopath)
+	video.delete()
+	print "{}\'s files have been deleted".format(title)
+    except Exception, e:
+	print e
 
