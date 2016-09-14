@@ -37,7 +37,7 @@ class PPTfile(models.Model):
 	    ordering = ['title']
 
 class PPTslice(models.Model):
-	index = models.IntegerField('相对位置')
+	index = models.IntegerField('相对位置',db_column='offset')
 	upload_time = models.DateTimeField('上传时间',auto_now_add=True)
 	img_path = models.CharField('图片',max_length=256)
 	pptfile = models.ForeignKey(PPTfile)
@@ -47,7 +47,7 @@ class PPTslice(models.Model):
 	    ordering = ['index']
 
 class Video(models.Model):
-	index = models.IntegerField('相对位置')
+	index = models.IntegerField('相对位置',db_column='offset')
 	introduce = models.CharField('视频简介',max_length=256,null=True)
 	upload_time = models.DateTimeField('上传时间',auto_now_add=True)
 	title = models.CharField('视频标题',max_length=32)
