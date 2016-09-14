@@ -6,6 +6,7 @@ from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
+from django.template.response import TemplateResponse
 
 from .utils import slug2id
 from .models import Notification
@@ -64,7 +65,7 @@ def mark_all_as_read(request):
 
     if _next:
         return redirect(_next)
-    return redirect('notifications:all')
+    return redirect('notifications:unread')
 
 
 @login_required
@@ -162,3 +163,23 @@ def live_unread_notification_list(request):
         'unread_list': unread_list
     }
     return JsonResponse(data)
+
+
+def unread_notification(request,
+        template_name="notifications/notification.html"):
+    qs = request.user.notifications.unread()
+    context = {"notifications": qs,
+            "logined": True,
+            "user_name": request.user.username}
+    return TemplateResponse(request, template_name, context)
+
+def all_notification(request,
+        template_name="notifications/notification.html"):
+    if getattr(settings, 'NOTIFICATIONS_SOFT_DELETE', False):
+        qs = request.user.notifications.active()
+    else:
+        qs = request.user.notifications.all()
+    context = {"notifications": qs,
+            "logined": True,
+            "user_name": request.user.username}
+    return TemplateResponse(request, template_name, context)

@@ -318,10 +318,11 @@ def add_comments(request):
 			new_answer_id = new_answer.id
 			code = 0
 			msg = ''
+                        url = '/classroom/'+str(course.id)+'/'+ppt_file_title + '/' + str(ppt_slice_id)
 
                         # notify.send(request.user, recipient=question.user, verb='replied the question:')
-                        notify.send(request.user, recipient=question.user, verb='回复了您的提问:',
-                            action_object=question,description=question.content)
+                        notify.send(request.user, recipient=question.user, verb='回答了您的提问:',
+                            action_object=question,description=question.content, url=url)
 
 		#comment on a quesiton
 		elif answer_id == -1:
@@ -332,6 +333,8 @@ def add_comments(request):
 			new_qc.save()
 			code = 0
 			msg = ''
+                        notify.send(request.user, recipient=curr_question.user, verb='评论了您的提问:',
+                            action_object=curr_question,description=curr_question.content)
 
 		#comment on an answer
 		elif answer_id >= 0:
@@ -342,6 +345,8 @@ def add_comments(request):
 			new_ac.save()
 			code = 0
 			msg = ''
+                        notify.send(request.user, recipient=curr_answer.user, verb='评论了您的回答:',
+                            action_object=curr_answer,description=curr_answer.content)
 
 		return HttpResponse(json.dumps({'code':code, 'msg': msg,\
 		'answer_id':new_answer_id, 'question_id': new_question_id, 'user_avatar': user_avatar}), \

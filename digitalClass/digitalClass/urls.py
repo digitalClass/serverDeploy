@@ -61,7 +61,7 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-        url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
+        url('^notifications/', include(notifications.urls, namespace='notifications')),
         ]
 
 if settings.DEBUG:

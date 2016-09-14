@@ -11,6 +11,7 @@ from digitalClass.utils import *
 import os
 import shutil
 
+from notifications.signals import notify
 
 @login_required
 def profile(request):
@@ -26,16 +27,16 @@ def profile(request):
 	    'users/profile.html',
 	    context,
 	    context_instance=RequestContext(request))
-	
+
         context = {
 	    "logined":logined,
 	    "user_name":user_name,
 	    "user_id":user_id,
 	    "user_role":user_role,
-	    "useravatar":useravatar, 
+	    "useravatar":useravatar,
 	    "course_list":course_list,}
 
-    '''	
+    '''
     logined = True
     user = request.user
     user_email = user.email
@@ -53,7 +54,7 @@ def profile(request):
     # Teaching assistant's part has not been finished
     if user_role == 'te':
 	course_list = user.teacher.filter(deleted=False)
-	if request.method == 'POST': 
+	if request.method == 'POST':
 	    course_id = int(request.POST['course_id'])
 	    course = Course.objects.get(id=course_id,deleted=False)
 	    ppts = course.pptfile_set.all()
@@ -67,14 +68,14 @@ def profile(request):
     else:	#user_role == 'st'
 	course_list = user.subscribed_user.filter(deleted=False)
 
-    # This part is to deal with replies of user's questions, answers and 
+    # This part is to deal with replies of user's questions, answers and
     #     comments.
     context = {
 	"logined":logined,
 	"user_name":user_name,
 	"user_id":user_id,
 	"user_role":user_role,
-	"useravatar":useravatar, 
+	"useravatar":useravatar,
 	"course_list":course_list,}
     return render_to_response('users/profile.html',context,context_instance=RequestContext(request))
 
@@ -84,7 +85,7 @@ def create_course(request):
     创建课程
     教师可以创建课程，教师身份才可以访问，其他身份会跳转至个人主页
 
-    Args: 
+    Args:
         request
         request.POST
         request.user
@@ -94,7 +95,7 @@ def create_course(request):
             course_teacher,
             course_data}
 
-    Return: 
+    Return:
         render_to_response(
             'create.html',
             context,
@@ -117,10 +118,10 @@ def create_course(request):
 	        f = form.cleaned_data
 	        img = ''
 	        course = Course.objects.create(
-                    introduce=f['course_data'], 
-                    img_path=img, 
-                    title=f['course_title'], 
-                    course_id = f['course_id'], 
+                    introduce=f['course_data'],
+                    img_path=img,
+                    title=f['course_title'],
+                    course_id = f['course_id'],
                     teacher_name=f['course_teacher'])
 	        u = User.objects.get(id=user_id)
 	        course.teacher.add(u)
@@ -132,7 +133,7 @@ def create_course(request):
             'logined':logined,
             'user_name':user_name,}
         return render_to_response('create.html',context,context_instance=RequestContext(request))
-    return HttpResponseRedirect('/accounts/profile/') 
+    return HttpResponseRedirect('/accounts/profile/')
 
 @login_required
 def course_edit(request, c_id):
@@ -262,6 +263,10 @@ def ppt_upload(request,c_id):
 		    #return render_to_response()
 		    if fname:
 		        #return HttpResponse("Successful.html")
+                        url = '/course/' + str(course_id)
+                        recipient = request.user
+                        notify.send(request.user, recipient=recipient, verb='上传了新课件:',
+                            description=ppt_title, url=url)
 			return render_to_response('test_course/ppt_upload_success.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
 	    else:
 		form = UploadPPTForm()
@@ -300,9 +305,9 @@ def delete_pptfile(ppt_id):
 	shutil.rmtree(pptpath)
 	#shutil.rmtree(videopath)
 	ppt.delete()
-	print "{}\'s files have been deleted".format(title)	
+	print "{}\'s files have been deleted".format(title)
     except Exception, e:
 	print e
-	
+
 
 

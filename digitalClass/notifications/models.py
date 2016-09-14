@@ -178,6 +178,7 @@ class Notification(models.Model):
 
     data = JSONField(blank=True, null=True)
     objects = NotificationQuerySet.as_manager()
+    url=models.URLField(blank=True, null=True)
 
     class Meta:
         ordering = ('-timestamp', )
@@ -248,6 +249,7 @@ def notify_handler(verb, **kwargs):
     description = kwargs.pop('description', None)
     timestamp = kwargs.pop('timestamp', timezone.now())
     level = kwargs.pop('level', Notification.LEVELS.info)
+    url = kwargs.pop('url')
 
     # Check if User or Group
     if isinstance(recipient, Group):
@@ -265,6 +267,7 @@ def notify_handler(verb, **kwargs):
             description=description,
             timestamp=timestamp,
             level=level,
+            url=url
         )
 
         # Set optional objects
