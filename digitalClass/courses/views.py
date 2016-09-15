@@ -181,7 +181,7 @@ def course_edit(request, c_id):
                 'form':form,
                 'logined':logined,
                 'user_name':user_name,}
-            return render(request,'create.html',context)
+        return render(request,'create.html',context)
     return HttpResponse('You aren\'t not the teacher of this course, you can\'t edit its infomation!')
 
 
