@@ -137,30 +137,51 @@ def create_course(request):
 
 @login_required
 def course_edit(request, c_id):
-    try:
-	course_id = int(c_id)
-    except ValueError:
-	raise HttpResponse('Please input correct CourseID ')
-    try:
-        course = Course.objects.get(id=course_id,deleted=False)
-    except Course.DoesNotExist:
-	return HttpResponse('Course does not exist')
-    if request.user.is_authenticated():
-	teacher = course.teacher.filter(id = request.user.id)
-	if teacher:
-	    if request.method == 'POST':
-		form = CourseForm(request.POST)
-		if form.is_valid():
-		    f = form.cleaned_data
-		    course.title = f['course_title']
-		    course.introduce = f['course_data']
-		    course.course_id = f['course_id']
-		    course.teacher_name = f['course_teacher']
-		    course.save()
-		    return HttpResponseRedirect('/accounts/profile/')
-	    else:
-		form = CourseForm({'course_title':course.title, 'course_id':course.course_id, 'course_data':course.introduce})
-    	    return render(request,'create.html',{'form':form})
+    '''
+    课程编辑页面，实现对课程信息的编辑,会拒绝没有非创建该课程教师的访问
+    
+    Args:
+        request
+        request.POST = {
+            'course_title':course_title,
+            'course_data':course_date,
+            'course_id':course_id,}
+
+    Returns:
+        HttpResponseRedirect('/accounts/profile/')
+
+    context = {
+        'form':form,
+        'logined':logined,
+        'user_name':user_name,}
+
+    '''
+    course = get_object_or_404(Course,id=int(c_id),deleted=False)
+    teacher = course.teacher.filter(id = request.user.id)
+    user_name = request.user.username
+    logined = True
+    if teacher:
+        if request.method == 'POST':
+            form = CourseForm(request.POST)
+	    if form.is_valid():
+	        f = form.cleaned_data
+	        course.title = f['course_title']
+	        course.introduce = f['course_data']
+	        course.course_id = f['course_id']
+	        course.teacher_name = f['course_teacher']
+	        course.save()
+	        return HttpResponseRedirect('/accounts/profile/')
+        else:
+            form = CourseForm({
+                'course_title':course.title, 
+                'course_id':course.course_id, 
+                'course_data':course.introduce,
+                'course_teacher':course.teacher_name})
+            context = {
+                'form':form,
+                'logined':logined,
+                'user_name':user_name,}
+            return render(request,'create.html',context)
     return HttpResponse('You aren\'t not the teacher of this course, you can\'t edit its infomation!')
 
 
@@ -192,7 +213,7 @@ def course_page(request, c_id):
         render(
             request
             'course.html',
-            context,
+            context)
         context = {'logined':logined,
                 'user_name':request.user.username,
                 'user_role':request.user.user_role,
@@ -212,7 +233,7 @@ def course_page(request, c_id):
         render(
             request
             'course.html',
-            context,
+            context)
         context = {'logined':logined,
                 'user_name':request.user.username,
                 'user_role':request.user.user_role,
@@ -275,6 +296,7 @@ def course_page(request, c_id):
 	#print request.POST
         return render(request,'course.html',context)
     else:
+        # reject POST method request for anonymous users
 	if request.method == 'POST':
 	    return HttpResponseRedirect('/accounts/login/')
     context = {
