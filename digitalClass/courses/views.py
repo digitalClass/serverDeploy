@@ -89,11 +89,6 @@ def create_course(request):
         request
         request.POST
         request.user
-        form = {
-            course_title,
-            course_id,
-            course_teacher,
-            course_data}
 
     Return:
         response(
@@ -286,7 +281,7 @@ def course_page(request, c_id):
             # Warning:This can only be applied by the creator
 	    if request.POST.get('delete_ppt_id','') and Is_this_course_teacher:
 		delete_pptfile(request.POST['delete_ppt_id'])
-            elif request.POST.get('delete_video_id',''):
+            elif request.POST.get('delete_video_id','') and Is_this_course_teacher:
                 delete_video(request.POST['delete_video_id'])
             return HttpResponseRedirect('')
         context = {
@@ -349,11 +344,11 @@ def ppt_upload(request,c_id):
 			return render_to_response('test_course/ppt_upload_fail_type.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
 		    ppt = PPTfile.objects.create(title=ppt_title,introduce=f['data'],source=fname,course_id=course_id)
 		    if course.img_path=='':
-		    	split_pdf.delay(fname,course_id,ppt_title,True)
-		    	#split_pdf(fname,course_id,ppt_title,True)
+		    	#split_pdf.delay(fname,course_id,ppt_title,True)
+		    	split_pdf(fname,course_id,ppt_title,True)
 		    else:
-		    	split_pdf.delay(fname,course_id,ppt_title)
-		    	#split_pdf(fname,course_id,ppt_title)
+		    	#split_pdf.delay(fname,course_id,ppt_title)
+		    	split_pdf(fname,course_id,ppt_title)
 		    #name = os.path.split(fname)[1].split(".")[0]
 		    #print name
 		    #return HttpResponse(name)
@@ -390,31 +385,41 @@ def handle_upload_file(f,course_id,title):
 
 
 def delete_pptfile(ppt_id):
-    #从数据库和服务器中删除ppt及其对应的pptslice
-    ppt = PPTfile.objects.get(id=int(ppt_id))
-    if ppt:
-	ppt.pptslice_set.all().delete()
-    course_id = ppt.course.id
-    title = ppt.title
-    pptpath = "/media/digitalClass/ppts/%d/%s/"%(course_id,title)
+    '''
+    从数据库和服务器中删除ppt及其对应的pptslice模型及文件，删除时直接删除课件文件夹，会导致pdf源文件也被删除
+    
+    Args:
+        ppt_id 要删除的ppt的id，可能为string数据或者int数据 
+    '''
+    # First, delete all slice model of this ppt
+    # Second, get the path of this ppt
+    # Third, delete all the file of ppt and slices
+    ppt = get_object_or_404(PPTfile,id=int(ppt_id))
+    ppt.pptslice_set.all().delete()
+    pptpath = "/media/digitalClass/ppts/%d/%s/"%(ppt.course.id,ppt.title)
     try:
 	shutil.rmtree(pptpath)
-	#shutil.rmtree(videopath)
-	ppt.delete()
-	print "{}\'s files have been deleted".format(title)
+        if not os.path.exists(pptpath):
+	    print "{}\'s files have been deleted".format(ppt.title)
+	    ppt.delete()
     except Exception, e:
 	print e
 
 def delete_video(video_id):
-    video = Video.objects.get(id=int(video_id))
-    course_id = video.course.id
-    title = video.title
-    pptpath = "/media/digitalClass/video/%d/%s/"%(course_id,title)
+    '''
+    从数据库和服务器中删除video对应的模型及文件
+    
+    Args:
+        video_id 要删除的video的id，可能为string数据或者int数据 
+    '''
+    # 
+    video = get_object_or_404(Video,id=int(video_id))
+    pptpath = "/media/digitalClass/video/%d/%s/"%(video.course_id,video.title)
     try:
 	shutil.rmtree(pptpath)
-	#shutil.rmtree(videopath)
-	video.delete()
-	print "{}\'s files have been deleted".format(title)
+        if not os.path.exists(pptpath):
+	    print "{}\'s files have been deleted".format(video.title)
+	    video.delete()
     except Exception, e:
 	print e
 
