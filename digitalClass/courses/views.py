@@ -307,25 +307,27 @@ def course_page(request, c_id):
     return render(request,'course.html',context)
 
 @login_required
+def upload_ppt(request,c_id):
+    '''
+    '''
+    # 
+    course = get_object_or_404(Course,id=int(c_id),deleted=False)
+    ppts = course.pptfile_set.all()
+    logined = True
+
+
+@login_required
 def ppt_upload(request,c_id):
     #show uploaded files
     #uploaded_list = []
     #how to upload more than one file
     #where to redirect when uploaded
-    try:
-        course_id = int(c_id)
-    except ValueError:
-        raise Http404()
-    try:
-        course = Course.objects.get(id=course_id,deleted=False)
-    except Course.DoesNotExist:
-        return HttpResponse('Course does not exist')
-    #course = get_object_or_404(Course,id=int(c_id),deleted=False)
+    course = get_object_or_404(Course,id=int(c_id),deleted=False)
     ppts = course.pptfile_set.all()
-    logined = False
-    if request.user.is_authenticated():
-        logined = True
-	if request.user.user_role == 'te':
+    #logined = False
+    #if request.user.is_authenticated():
+    logined = True
+    if request.user.user_role == 'te':
 	    if request.method == 'POST':
 		form = UploadPPTForm(request.POST,request.FILES)
 		if form.is_valid():
@@ -359,10 +361,15 @@ def ppt_upload(request,c_id):
                         recipient = request.user
                         notify.send(request.user, recipient=recipient, verb='上传了新课件:',
                             description=ppt_title, url=url)
-			return render_to_response('test_course/ppt_upload_success.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
+			return render_to_response('test_course/ppt_upload_success.html',{'logined':request.user.is_authenticated(), 'user_name':request.user.username})
 	    else:
 		form = UploadPPTForm()
-            return render_to_response('test_course/ppt_upload.html',{'form':form,'logined':logined,'user_name':request.user.username}, context_instance=RequestContext(request))
+            context = {
+                'form':form,
+                'logined':logined,
+                'user_name':request.user.username}
+                
+            return render(request,'test_course/ppt_upload.html',context)
     return render_to_response("premissionDeniey.html",{'logined':logined,'user_name':request.user.username})
 
 def handle_upload_file(f,course_id,title):
