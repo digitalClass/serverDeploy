@@ -3,14 +3,15 @@ from __future__ import unicode_literals
 from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 from users import models as users_models
+from django.forms import ModelForm,Textarea
 
 class Course(models.Model):
 	introduce = models.CharField('课程简介',max_length=256,null=True)
 	create_time = models.DateTimeField('课程创建时间',auto_now_add=True)
-	img_path = models.CharField('缩略图',max_length=256)
+	img_path = models.CharField('缩略图',max_length=256,default='')
 	title = models.CharField('课程名称',max_length=32)
-	course_id = models.CharField('',max_length=16, null=True)
-	teacher_name = models.CharField('任课老师',max_length=16,default="None")
+	course_id = models.CharField('课程编号',max_length=16, null=True)
+	teacher_name = models.CharField('任课老师',max_length=16,default='')
 	teacher = models.ManyToManyField(users_models.User,related_name="teacher")
 	#课程助教
 	teaching_assitant = models.ManyToManyField(users_models.User, related_name="teaching_assistant")
@@ -22,6 +23,13 @@ class Course(models.Model):
 	    return self.title
 	class Meta:
 	    ordering = ['create_time']
+
+class CourseForm(ModelForm):
+    class Meta:
+        model = Course
+        fields = ['title','course_id','teacher_name','introduce']
+        widgets = {
+            'introduce':Textarea()}
 
 
 @python_2_unicode_compatible

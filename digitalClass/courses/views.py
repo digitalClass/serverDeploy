@@ -2,9 +2,9 @@
 from django.shortcuts import render,render_to_response,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect,Http404,HttpResponse
-from courses.models import Course, PPTfile, PPTslice
+from courses.models import *
 from users.models import User
-from courses.form import *
+from courses.form import UploadPPTForm
 from courses.filetype import *
 from django.template import RequestContext
 from digitalClass.utils import *
@@ -115,14 +115,15 @@ def create_course(request):
             # if the form data is valid, create course
             # and return to profile
 	    if form.is_valid():
-	        f = form.cleaned_data
-	        img = ''
-	        course = Course.objects.create(
-                    introduce=f['course_data'],
-                    img_path=img,
-                    title=f['course_title'],
-                    course_id = f['course_id'],
-                    teacher_name=f['course_teacher'])
+	        #f = form.cleaned_data
+	        #img = ''
+	        #course = Course.objects.create(
+                    #introduce=f['course_data'],
+                    #img_path=img,
+                    #title=f['course_title'],
+                    #course_id = f['course_id'],
+                    #teacher_name=f['course_teacher'])
+                course = form.save()
 	        u = User.objects.get(id=user_id)
 	        course.teacher.add(u)
 	        return HttpResponseRedirect('/accounts/profile/')
@@ -162,25 +163,27 @@ def course_edit(request, c_id):
     logined = True
     if teacher:
         if request.method == 'POST':
-            form = CourseForm(request.POST)
+            form = CourseForm(request.POST,instance=course)
 	    if form.is_valid():
-	        f = form.cleaned_data
-	        course.title = f['course_title']
-	        course.introduce = f['course_data']
-	        course.course_id = f['course_id']
-	        course.teacher_name = f['course_teacher']
-	        course.save()
+	        #f = form.cleaned_data
+	        #course.title = f['course_title']
+	        #course.introduce = f['course_data']
+	        #course.course_id = f['course_id']
+	        #course.teacher_name = f['course_teacher']
+	        #course.save()
+                form.save()
 	        return HttpResponseRedirect('/accounts/profile/')
         else:
-            form = CourseForm({
-                'course_title':course.title, 
-                'course_id':course.course_id, 
-                'course_data':course.introduce,
-                'course_teacher':course.teacher_name})
-            context = {
-                'form':form,
-                'logined':logined,
-                'user_name':user_name,}
+            form = CourseForm(
+               # {'course_title':course.title, 
+               # 'course_id':course.course_id, 
+               # 'course_data':course.introduce,
+               # 'course_teacher':course.teacher_name}
+               instance = course)
+        context = {
+            'form':form,
+            'logined':logined,
+            'user_name':user_name,}
         return render(request,'create.html',context)
     return HttpResponse('You aren\'t not the teacher of this course, you can\'t edit its infomation!')
 
@@ -286,7 +289,8 @@ def course_page(request, c_id):
             elif request.POST.get('delete_video_id',''):
                 delete_video(request.POST['delete_video_id'])
             return HttpResponseRedirect('')
-        context = {'logined':logined,
+        context = {
+                'logined':logined,
                 'user_name':request.user.username,
                 'user_role':request.user.user_role,
                 'course':course,
