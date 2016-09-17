@@ -312,8 +312,20 @@ def upload_ppt(request,c_id):
     '''
     # 
     course = get_object_or_404(Course,id=int(c_id),deleted=False)
-    ppts = course.pptfile_set.all()
+    #ppts = course.pptfile_set.all()
     logined = True
+    teacher = course.teacher.filter(id=request.user.id)
+    if not teacher:
+        HttpResponseRedirect('/accounts/profile')
+    if request.method == 'POST':
+        form = PPTfileForm(request.POST,request.FILES)
+        if form.is_valid():
+            #If_ppt_existed = course.pptfile_set.filter(title=ppt_title)
+            ftype = filetype()
+            ppt = form.save(commit=False)
+            ppt.course = course.id
+            ppt.save()
+            
 
 
 @login_required
@@ -323,7 +335,7 @@ def ppt_upload(request,c_id):
     #how to upload more than one file
     #where to redirect when uploaded
     course = get_object_or_404(Course,id=int(c_id),deleted=False)
-    ppts = course.pptfile_set.all()
+    #ppts = course.pptfile_set.all()
     #logined = False
     #if request.user.is_authenticated():
     logined = True
@@ -338,26 +350,26 @@ def ppt_upload(request,c_id):
 		    if If_ppt_existed:
 			#return HttpResponse("A same named PPT has existed in this course!")
 			return render_to_response('test_course/ppt_upload_fail_crush.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
-		    fname = handle_upload_file(upload_file,course_id,ppt_title)
+		    fname = handle_upload_file(upload_file,course.id,ppt_title)
 		    ftype = filetype(fname)
 		    if ftype != "PDF":
 			#return HttpResponse(ftype)
 		        #return HttpResponse("You have to upload a pdf file.")
 			return render_to_response('test_course/ppt_upload_fail_type.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
-		    ppt = PPTfile.objects.create(title=ppt_title,introduce=f['data'],source=fname,course_id=course_id)
+		    ppt = PPTfile.objects.create(title=ppt_title,introduce=f['data'],source=fname,course_id=course.id)
 		    if course.img_path=='':
 		    	#split_pdf.delay(fname,course_id,ppt_title,True)
-		    	split_pdf(fname,course_id,ppt_title,True)
+		    	split_pdf(fname,course.id,ppt_title,True)
 		    else:
 		    	#split_pdf.delay(fname,course_id,ppt_title)
-		    	split_pdf(fname,course_id,ppt_title)
+		    	split_pdf(fname,course.id,ppt_title)
 		    #name = os.path.split(fname)[1].split(".")[0]
 		    #print name
 		    #return HttpResponse(name)
 		    #return render_to_response()
 		    if fname:
 		        #return HttpResponse("Successful.html")
-                        url = '/course/' + str(course_id)
+                        url = '/course/' + str(course.id)
                         recipient = request.user
                         notify.send(request.user, recipient=recipient, verb='上传了新课件:',
                             description=ppt_title, url=url)
