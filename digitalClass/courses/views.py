@@ -315,18 +315,30 @@ def upload_ppt(request,c_id):
     #ppts = course.pptfile_set.all()
     logined = True
     teacher = course.teacher.filter(id=request.user.id)
+    context = {
+        'form':{},
+        'logined':logined,
+        'user_name':request.user.username,}
     if not teacher:
         HttpResponseRedirect('/accounts/profile')
     if request.method == 'POST':
         form = PPTfileForm(request.POST,request.FILES)
         if form.is_valid():
             #If_ppt_existed = course.pptfile_set.filter(title=ppt_title)
-            ftype = filetype()
+            #ftype = filetype()
             ppt = form.save(commit=False)
-            ppt.course = course.id
+            if course.pptfile_set.filter(title=ppt.title):
+                return render(request,'test_course/ppt_upload_fail_crush.html',context)
+            if filetype(ppt.source.file.url) != 'PDF':
+                return render(request,'test_course/ppt_upload_fail_type.html',context)
+            ppt.course = course
             ppt.save()
+            return render(request,'test_course/ppt_upload_success.html',context)
             
-
+    else:
+        form = PPTfileForm()
+    context.update({'form':form})
+    return render(request,'test_course/ppt_upload.html',context)
 
 @login_required
 def ppt_upload(request,c_id):
@@ -347,6 +359,7 @@ def ppt_upload(request,c_id):
 		    ppt_title = f['title']
 		    upload_file = request.FILES['file']
 		    If_ppt_existed = course.pptfile_set.filter(title=ppt_title)
+		    #检测是否有同名课件
 		    if If_ppt_existed:
 			#return HttpResponse("A same named PPT has existed in this course!")
 			return render_to_response('test_course/ppt_upload_fail_crush.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})

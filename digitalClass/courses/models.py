@@ -37,13 +37,13 @@ class PPTfile(models.Model):
     introduce = models.CharField('课件简介',max_length=256,null=True)
     upload_time = models.DateTimeField('上传时间',auto_now_add=True)
     title = models.CharField('课件标题',max_length=32)
-    source = models.CharField('资源',max_length=256,default="")
-    #source = models.FileField(upload_to=self.upload_to)
+    #source = models.CharField('资源',max_length=256,default="")
     course = models.ForeignKey(Course)
+    def PPTfile_upload_to(instance,filename):
+        return 'ppts/{}/{}/{}'.format(instance.course.id,instance.title,filename)
+    source = models.FileField('上传课件',upload_to=PPTfile_upload_to)
     def __str__(self):
         return self.title
-    def upload_to(instance,filename):
-        return 'ppts/{}/{}/{}'.format(instance.course.id,instance.title,filename)
     class Meta:
         ordering = ['title']
 
@@ -51,6 +51,8 @@ class PPTfileForm(ModelForm):
     class Meta:
         model = PPTfile
         fields = ['title','source','introduce']
+        widgets = {
+            'introduce':Textarea()}
 
 class PPTslice(models.Model):
 	index = models.IntegerField('相对位置',db_column='offset')
