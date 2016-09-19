@@ -125,7 +125,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 		q_data['question_id'] = q.id
 		q_data['username'] = q.user.username
 		user_avatar = q.user.useravatar.name
-		if user_avatar == '' or user_avatar =='NULL':
+		if user_avatar == '' or user_avatar =='NULL' or user_avatar == None:
 			user_avatar = 'avatar/default.png'
 		q_data['user_avatar'] = '/media/'+user_avatar
 		q_data['date'] = q.date
@@ -139,7 +139,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 				qc_data = {}
 				qc_data['username'] = qc.user.username
 				user_avatar = q.user.useravatar.name
-				if user_avatar == '' or user_avatar =='NULL':
+				if user_avatar == '' or user_avatar =='NULL' or user_avatar == None:
 					user_avatar = 'avatar/default.png'
 				qc_data['user_avatar'] = '/media/'+user_avatar
 				qc_data['date'] = qc.date
@@ -155,7 +155,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 			a_data['answer_id'] = a.id
 			a_data['username'] = a.user.username
 			user_avatar = q.user.useravatar.name
-			if user_avatar == '' or user_avatar =='NULL':
+			if user_avatar == '' or user_avatar =='NULL' or user_avatar==None:
 				user_avatar = 'avatar/default.png'
 			a_data['user_avatar'] = '/media/'+user_avatar
 			a_data['date'] = a.date
@@ -169,7 +169,7 @@ def classroom(request, course_id, ppt_title, slice_index):
 				ac_data = {}
 				ac_data['username'] = ac.user.username
 				user_avatar = q.user.useravatar.name
-				if user_avatar == '' or user_avatar =='NULL':
+				if user_avatar == '' or user_avatar =='NULL' or user_avatar ==None:
 					user_avatar = 'avatar/default.png'
 				ac_data['user_avatar'] = '/media/'+user_avatar
 				ac_data['date'] = ac.date
@@ -269,7 +269,7 @@ def add_vote(request):
 def add_comments(request):
 	now = datetime.datetime.now()
 	user_avatar = request.user.useravatar.name
-	if user_avatar == '' or user_avatar =='NULL':
+	if user_avatar == '' or user_avatar =='NULL' or user_avatar==None:
 		user_avatar = 'avatar/default.png'
 	user_avatar = '/media/'+user_avatar
 	if request.method == 'POST':
@@ -462,7 +462,7 @@ def video(request, course_id, video_title):
 		title=video_title)[0]
 #		print(video)
 		video_comments = comments_models.Video_Comment.objects.\
-		filter(video=video)
+		order_by('-date').filter(video=video)
 	except:
 		return HttpResponseRedirect('/404/')
 
@@ -481,7 +481,7 @@ def video(request, course_id, video_title):
 		vc_data['date'] = vc.date
 		vc_data['user_name'] = vc.user.username
 		user_avatar = vc.user.useravatar.name
-		if user_avatar == '' or user_avatar =='NULL':
+		if user_avatar == '' or user_avatar =='NULL' or user_avatar==None:
 			user_avatar = 'avatar/default.png'
 		vc_data['user_avatar'] = '/media/'+user_avatar
 		vc_data['content'] = vc.content
@@ -501,23 +501,27 @@ def video(request, course_id, video_title):
 def add_video_comment(request):
 	if  request.method == 'POST':
 		now = datetime.datetime.now()
+		vc_data = {}
+		vc_data['date'] = now
+		vc_data['user_name'] = request.user.username
+		user_avatar = request.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL' or user_avatar ==None:
+			user_avatar = 'avatar/default.png'
+		user_avatar = '/media/'+user_avatar
+
 		course_id = int(request.POST['course_id'])
 		video_name = request.POST['video_name']
 		content = request.POST['content']
+		vc_data['content'] = content
+		if content.isspace() or not content:
+			return {'result': -1, 'msg': '评论内容不能为空','date':str(now),'user_name': request.user.username,
+			'user_avatar': user_avatar, 'content':content}
+
 		course = courses_models.Course.objects.get(id=course_id)
 		video = courses_models.Video.objects.filter(course=course,title=video_name)[0]
 		new_vc = comments_models.Video_Comment(date=now,
 		video=video,user=request.user,content=content)
 		new_vc.save()
-
-		vc_data = {}
-		vc_data['date'] = now
-		vc_data['user_name'] = request.user.username
-		user_avatar = request.user.useravatar.name
-		if user_avatar == '' or user_avatar =='NULL':
-			user_avatar = 'avatar/default.png'
-		user_avatar = '/media/'+user_avatar
-		vc_data['content'] = content
 
 
 		return {'result': 0, 'date':str(now),'user_name': request.user.username,
@@ -536,7 +540,7 @@ def discuss(request):
 		d_data['date'] = content.date
 		d_data['user_name'] = content.user
 		user_avatar = content.user.useravatar.name
-		if user_avatar == '' or user_avatar =='NULL':
+		if user_avatar == '' or user_avatar =='NULL' or user_avatar==None:
 			user_avatar = 'avatar/default.png'
 		user_avatar = '/media/'+user_avatar
 		d_data['user_avatar'] = user_avatar
@@ -551,15 +555,18 @@ def discuss(request):
 def add_discuss_comment(request):
 	if  request.method == 'POST':
 		now = datetime.datetime.now()
+		user_avatar = request.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL' or user_avatar ==None:
+			user_avatar = 'avatar/default.png'
+		user_avatar = '/media/'+user_avatar
 		content = request.POST['content']
+		if content.isspace() or not content:
+			return {'result': -1, 'msg': '评论内容不能为空','date':str(now),'user_name': request.user.username,
+			'user_avatar': user_avatar, 'content':content}
+
 		new_dc = comments_models.Discuss_Comment(date=now,
 		user=request.user,content=content)
 		new_dc.save()
-
-		user_avatar = request.user.useravatar.name
-		if user_avatar == '' or user_avatar =='NULL':
-			user_avatar = 'avatar/default.png'
-		user_avatar = '/media/'+user_avatar
 
 		return {'result': 0, 'date':str(now),'user_name': request.user.username,
 		'user_avatar': user_avatar, 'content':content}
