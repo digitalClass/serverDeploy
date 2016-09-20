@@ -62,7 +62,7 @@ def profile(request):
 		delete_pptfile(ppt.id) #  Delete all of the ppts in this course
             course.deleted=True
             course.save()
-	    return HttpResponseRedirect('')
+	    return HttpResponseRedirect('./')
     elif user_role == 'ta':
 	return HttpResponseRedirect('')
     else:	#user_role == 'st'
