@@ -579,11 +579,13 @@ def add_discuss_comment(request):
 			user_avatar = 'avatar/default.png'
 		user_avatar = '/media/'+user_avatar
 		content = request.POST['content']
+		thread_id = int(request.POST['thread_id'])
 		if content.isspace() or not content:
 			return {'result': -1, 'msg': '评论内容不能为空','date':str(now),'user_name': request.user.username,
 			'user_avatar': user_avatar, 'content':content}
 
-		new_dc = comments_models.Discuss_Thread(date=now,
+		new_dt = comments_models.Discuss_Thread(id=thread_id)
+		new_dc = comments_models.Discuss_Comment(discuss_thread=new_dt,date=now,
 		user=request.user,content=content)
 		new_dc.save()
 
