@@ -9,6 +9,7 @@ import datetime
 import json
 import urllib
 import math
+import operator
 
 from comments import models as comments_models
 from comments import views as comments_views
@@ -605,5 +606,25 @@ def contact(request):
 	return render_to_response('contact.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
 
 def index(request):
-	return render_to_response('homepage.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username},context_instance=RequestContext(request))
+	#获取最热门的课程：即订阅人数最多的课程
+	all_courses = courses_models.Course.objects.all()
+	course_subscriber_index = {}
+	for course in all_courses:
+		course_subscriber_index[course.id] = course.subscribed_user.all().count()
+
+	sorted_course_subscriber = sorted(course_subscriber_index.items(), key=operator.itemgetter(1))
+	hot_course_data = []
+	for i in sorted_course_subscriber[-3:]:
+		current_course = courses_models.Course.objects.get(id=i[0])
+		cd = {}
+		cd['id'] = i[0]
+		cd['title'] = current_course.title
+		cd['introduce'] = current_course.introduce
+		cd['create_time'] = current_course.create_time
+		cd['teacher_name'] = current_course.teacher_name
+		cd['subscribe_num'] = i[1]
+
+		hot_course_data.append(cd)
+
+	return render_to_response('homepage.html',{'logined': request.user.is_authenticated(),'user_name':request.user.username,'hot_course_data_1': [hot_course_data[-1], hot_course_data[-2]], 'hot_course_data_2': hot_course_data[0:1]},context_instance=RequestContext(request))
 
