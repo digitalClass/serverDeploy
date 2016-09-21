@@ -533,12 +533,14 @@ def add_video_comment(request):
 
 
 def discuss(request):
-	content_list = comments_models.Discuss_Comment.objects.order_by('-date').filter()
+	content_list = comments_models.Discuss_Thread.objects.order_by('-date').filter()
 	discuss_data = []
 	for content in content_list:
 		d_data = {}
-		d_data['date'] = content.date
-		d_data['user_name'] = content.user
+		d_data['id'] = content.id
+		d_data['time'] = content.date
+		d_data['title'] = content.title
+		d_data['author'] = content.user
 		user_avatar = content.user.useravatar.name
 		if user_avatar == '' or user_avatar =='NULL' or user_avatar==None:
 			user_avatar = 'avatar/default.png'
@@ -549,6 +551,23 @@ def discuss(request):
 
 	return render_to_response('discuss.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'discuss_data': discuss_data},context_instance=RequestContext(request))
 
+
+def discuss_thread(request, thread_id):
+	content_list = comments_models.Discuss_Comment.objects.order_by('-date').filter(discuss_thread=thread_id)
+	discuss_data = []
+	for content in content_list:
+		d_data = {}
+		d_data['date'] = content.date
+		d_data['user'] = content.user
+		user_avatar = content.user.useravatar.name
+		if user_avatar == '' or user_avatar =='NULL' or user_avatar==None:
+			user_avatar = 'avatar/default.png'
+		user_avatar = '/media/'+user_avatar
+		d_data['user_avatar'] = user_avatar
+		d_data['content'] = content.content
+		discuss_data.append(d_data)
+
+	return render_to_response('discuss_thread.html', {'logined': request.user.is_authenticated(),'user_name':request.user.username,'discuss_data': discuss_data},context_instance=RequestContext(request))
 
 @ajax
 @login_required
@@ -564,7 +583,7 @@ def add_discuss_comment(request):
 			return {'result': -1, 'msg': '评论内容不能为空','date':str(now),'user_name': request.user.username,
 			'user_avatar': user_avatar, 'content':content}
 
-		new_dc = comments_models.Discuss_Comment(date=now,
+		new_dc = comments_models.Discuss_Thread(date=now,
 		user=request.user,content=content)
 		new_dc.save()
 

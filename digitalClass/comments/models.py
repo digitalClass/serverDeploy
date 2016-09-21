@@ -82,8 +82,19 @@ class Video_Comment(models.Model):
 	def __unicode__(self):
 		return self.content
 	
+class Discuss_Thread(models.Model):
+	""" comment thread model in discuss page."""
+	date = models.DateTimeField()
+	title = models.CharField(max_length=128, null=True)
+	user = models.ForeignKey(users_models.User, null=True)
+	content = models.CharField(max_length=1024)
+
+	def __unicode__(self):
+		return self.content
+	
 class Discuss_Comment(models.Model):
-	""" comment model in discuss page."""
+	""" comment model in discuss thread page."""
+	discuss_thread = models.ForeignKey(Discuss_Thread, null=True)
 	date = models.DateTimeField()
 	user = models.ForeignKey(users_models.User, null=True)
 	content = models.CharField(max_length=1024)

@@ -41,6 +41,7 @@ urlpatterns = [
     url(r'^page_change/$', digitalClass_views.page_change),
     url(r'^add_video_comment/$', digitalClass_views.add_video_comment),
     url(r'^discuss/$', digitalClass_views.discuss),
+    url(r'^discuss/thread/(\d+)/$', digitalClass_views.discuss_thread),
     url(r'^add_discuss_comment/$', digitalClass_views.add_discuss_comment),
     url(r'^about/$', digitalClass_views.about),
     url(r'^contact/$', digitalClass_views.contact),
