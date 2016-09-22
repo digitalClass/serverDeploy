@@ -256,6 +256,7 @@ def course_page(request, c_id):
     '''
     course = get_object_or_404(Course,id=int(c_id),deleted=False)
     ppts = course.pptfile_set.all()
+    videos = course.video_set.all()
     Is_this_course_teacher = False
     Is_subscribed = False
     logined = False
@@ -293,6 +294,7 @@ def course_page(request, c_id):
                 'user_role':request.user.user_role,
                 'course':course,
                 'ppts':ppts,
+                'videos':videos,
                 'Is_this_course_teacher':Is_this_course_teacher,
                 'Is_subscribed':Is_subscribed,}
 	#print request.POST
@@ -305,6 +307,7 @@ def course_page(request, c_id):
         'logined':logined,
         'course':course,
         'ppts':ppts,
+        'videos':videos,
         'Is_this_course_teacher':Is_this_course_teacher,
         'Is_subscribed':Is_subscribed,}
     return render(request,'course.html',context)
