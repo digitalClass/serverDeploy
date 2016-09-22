@@ -46,7 +46,7 @@ def split_pdf(pdf_path,course_id,ppt_title,create_img=False,save_dir=None):
 			parent_url_dir = parent_dir[0:6]+parent_dir[19:]
 			img_ur_path = parent_url_dir+'/0.thumbnail'
 
-			course.img_path = img_ur_path
+			course.img = img_ur_path
 			course.save()
 	except:
 		pass

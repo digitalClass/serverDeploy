@@ -26,7 +26,12 @@ def bytes2hex(bytes):
    
 # 获取文件类型 
 def filetype(filename): 
-    binfile = open(filename, 'rb') # 必需二制字读取 
+    print str(type(filename))
+    if type(filename) == type('str'):
+        binfile = open(filename, 'rb') # 必需二制字读取
+    else:
+        filename.open('rb')
+        binfile = filename
     tl = typeList() 
     ftype = 'unknown'
     for hcode in tl.keys(): 

@@ -369,12 +369,13 @@ def ppt_upload(request,c_id):
 		    if If_ppt_existed:
 			#return HttpResponse("A same named PPT has existed in this course!")
 			return render_to_response('test_course/ppt_upload_fail_crush.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
-		    fname = handle_upload_file(upload_file,course.id,ppt_title)
-		    ftype = filetype(fname)
+                    #return HttpResponse(request.FILES['file'])
+		    ftype = filetype(request.FILES['file'])
 		    if ftype != "PDF":
 			#return HttpResponse(ftype)
 		        #return HttpResponse("You have to upload a pdf file.")
 			return render_to_response('test_course/ppt_upload_fail_type.html',{'logined': request.user.is_authenticated(), 'user_name':request.user.username})
+		    fname = handle_upload_file(upload_file,course.id,ppt_title)
 		    ppt = PPTfile.objects.create(title=ppt_title,introduce=f['data'],source=fname,course_id=course.id)
 		    if course.img=='':
 		    	#split_pdf.delay(fname,course_id,ppt_title,True)
