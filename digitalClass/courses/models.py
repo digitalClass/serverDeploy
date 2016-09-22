@@ -5,10 +5,13 @@ from django.db import models
 from users import models as users_models
 from django.forms import ModelForm,Textarea
 
+def imageUploadTo(instance,filename):
+    return 'ppts/{}'.format(instance.id)
+
 class Course(models.Model):
 	introduce = models.CharField('课程简介',max_length=256,null=True)
 	create_time = models.DateTimeField('课程创建时间',auto_now_add=True)
-	img_path = models.CharField('缩略图',max_length=256,default='')
+	img = models.ImageField('缩略图',upload_to='thumbnail/',null=True,blank=True)
 	title = models.CharField('课程名称',max_length=32)
 	course_id = models.CharField('课程编号',max_length=16, null=True)
 	teacher_name = models.CharField('任课老师',max_length=16,default='')
@@ -27,13 +30,14 @@ class Course(models.Model):
 class CourseForm(ModelForm):
     class Meta:
         model = Course
-        fields = ['title','course_id','teacher_name','introduce']
+        fields = ['title','course_id','teacher_name','img','introduce']
         widgets = {
             'introduce':Textarea()}
 
 
-def PPTfile_upload_to(instance,filename):
+def PPTfileUploadTo(instance,filename):
     return 'ppts/{}/{}/{}'.format(instance.course.id,instance.title,filename)
+
 @python_2_unicode_compatible
 class PPTfile(models.Model):
     introduce = models.CharField('课件简介',max_length=256,null=True)
@@ -41,7 +45,7 @@ class PPTfile(models.Model):
     title = models.CharField('课件标题',max_length=32)
     #source = models.CharField('资源',max_length=256,default="")
     course = models.ForeignKey(Course)
-    source = models.FileField('上传课件',upload_to=PPTfile_upload_to)
+    source = models.FileField('上传课件',upload_to=PPTfileUploadTo)
     def __str__(self):
         return self.title
     class Meta:
