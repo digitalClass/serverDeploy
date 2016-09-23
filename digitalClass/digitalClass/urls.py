@@ -54,6 +54,7 @@ urlpatterns += [
     url(r'^accounts/profile/$', courses_views.profile),
     url(r'^course/(\d+)/ppt_upload/$', courses_views.ppt_upload),
     url(r'^course/(\d+)/edit/$', courses_views.course_edit),
+    url(r'^course/(\d+)/video/([\w|\W]+)/$', digitalClass_views.video),
 ]
 
 #error routes

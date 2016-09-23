@@ -476,6 +476,7 @@ def video(request, course_id, video_title):
 	video_data['upload_time'] = video.upload_time
 	video_data['title'] = video.title
 	video_data['path'] = video.video_path
+	video_data['url_path'] = "/media/medias/"+str(course_id)+'/videos/'+ video.title 
 
 	for vc in video_comments:
 		vc_data = {}
