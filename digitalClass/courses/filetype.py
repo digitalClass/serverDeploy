@@ -42,7 +42,7 @@ def filetype(filename):
         if f_hcode == hcode: 
             ftype = tl[hcode] 
             break
-    binfile.close() 
+    #binfile.close() 
     return ftype 
    
 if __name__ == '__main__': 

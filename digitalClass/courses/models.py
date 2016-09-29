@@ -4,9 +4,9 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.db import models
 from users import models as users_models
 from django.forms import ModelForm,Textarea
-
-def imageUploadTo(instance,filename):
-    return 'ppts/{}'.format(instance.id)
+from django.core.exceptions import ValidationError
+import gettext
+from filetype import *
 
 class Course(models.Model):
 	introduce = models.CharField('课程简介',max_length=256,null=True)
@@ -52,6 +52,13 @@ class PPTfile(models.Model):
         ordering = ['title']
 
 class PPTfileForm(ModelForm):
+    def clean_source(self):
+        source = self.cleaned_data.get('source')
+        ftype = filetype(source)
+        if ftype != 'PDF':
+            raise ValidationError(
+                u'请上传PDF文件')
+        return source
     class Meta:
         model = PPTfile
         fields = ['title','source','introduce']

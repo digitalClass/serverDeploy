@@ -332,11 +332,11 @@ def upload_ppt(request,c_id):
         if form.is_valid():
             #If_ppt_existed = course.pptfile_set.filter(title=ppt_title)
             #ftype = filetype()
-            ppt = form.save(commit=False)
-            if course.pptfile_set.filter(title=ppt.title):
+            if course.pptfile_set.filter(title=form.cleaned_data['title']):
                 return render(request,'test_course/ppt_upload_fail_crush.html',context)
-            if filetype(ppt.source.file.url) != 'PDF':
-                return render(request,'test_course/ppt_upload_fail_type.html',context)
+            #if filetype(ppt.source.file.url) != 'PDF':
+                #return render(request,'test_course/ppt_upload_fail_type.html',context)
+            ppt = form.save(commit=False)
             ppt.course = course
             ppt.save()
             return render(request,'test_course/ppt_upload_success.html',context)
