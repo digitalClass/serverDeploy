@@ -52,7 +52,7 @@ urlpatterns += [
     url(r'^create/$', courses_views.create_course),
     url(r'^course/(\d+)/$', courses_views.course_page),
     url(r'^accounts/profile/$', courses_views.profile),
-    url(r'^course/(\d+)/ppt_upload/$', courses_views.ppt_upload),
+    url(r'^course/(\d+)/ppt_upload/$', courses_views.upload_ppt),
     url(r'^course/(\d+)/edit/$', courses_views.course_edit),
     url(r'^course/(\d+)/video/([\w|\W]+)/$', digitalClass_views.video),
 ]

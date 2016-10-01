@@ -315,6 +315,16 @@ def course_page(request, c_id):
 @login_required
 def upload_ppt(request,c_id):
     '''
+    课件上传函数 用于上传课件，网页页面上传，将检查文件是否为pdf类型，上传后会在后台对PDF课件进行切分，保存在/media/digitalClass/ppts/course.id/pptfile.title/下
+    Args:
+        request
+        c_id 课程编号，str类型
+    
+    Returns:
+        render(
+            request,
+            'test_course/ppt_upload.html',
+            context)
     '''
     # 
     course = get_object_or_404(Course,id=int(c_id),deleted=False)
@@ -331,14 +341,20 @@ def upload_ppt(request,c_id):
         form = PPTfileForm(request.POST,request.FILES)
         if form.is_valid():
             #If_ppt_existed = course.pptfile_set.filter(title=ppt_title)
-            #ftype = filetype()
             if course.pptfile_set.filter(title=form.cleaned_data['title']):
                 return render(request,'test_course/ppt_upload_fail_crush.html',context)
-            #if filetype(ppt.source.file.url) != 'PDF':
-                #return render(request,'test_course/ppt_upload_fail_type.html',context)
+            #Create PPTfile 
             ppt = form.save(commit=False)
             ppt.course = course
             ppt.save()
+            # Use digitalClass.util.split_pdf to split pdf file
+            #split_pdf.delay(fname,course_id,ppt_title)
+            split_pdf(ppt.source.path,course.id,ppt.title)
+            # Send notifications to subscribed user and request.user
+            url = '/course/' + str(course.id)
+            #recipient = list(course.subscribed_user.all())
+            recipient = request.user
+            #notify.send(request.user, recipient=recipient, verb='上传了新课件:',description=ppt.title, url=url)
             return render(request,'test_course/ppt_upload_success.html',context)
             
     else:
@@ -346,6 +362,48 @@ def upload_ppt(request,c_id):
     context.update({'form':form})
     return render(request,'test_course/ppt_upload.html',context)
 
+def delete_pptfile(ppt_id):
+    '''
+    从数据库和服务器中删除ppt及其对应的pptslice模型及文件，删除时直接删除课件文件夹，会导致pdf源文件也被删除
+    
+    Args:
+        ppt_id 要删除的ppt的id，可能为string数据或者int数据 
+    '''
+    # First, delete all slice model of this ppt
+    # Second, get the path of this ppt
+    # Third, delete all the file of ppt and slices
+    ppt = get_object_or_404(PPTfile,id=int(ppt_id))
+    ppt.pptslice_set.all().delete()
+    pptpath = "/media/digitalClass/ppts/%d/%s/"%(ppt.course.id,ppt.title)
+    try:
+	shutil.rmtree(pptpath)
+        if not os.path.exists(pptpath):
+	    print "{}\'s files have been deleted".format(ppt.title)
+	    ppt.delete()
+    except Exception, e:
+	print e
+
+def delete_video(video_id):
+    '''
+    从数据库和服务器中删除video对应的模型及文件
+    
+    Args:
+        video_id 要删除的video的id，可能为string数据或者int数据 
+    '''
+    # 
+    video = get_object_or_404(Video,id=int(video_id))
+    pptpath = "/media/digitalClass/video/%d/%s/"%(video.course_id,video.title)
+    try:
+	shutil.rmtree(pptpath)
+        if not os.path.exists(pptpath):
+	    print "{}\'s files have been deleted".format(video.title)
+	    video.delete()
+    except Exception, e:
+	print e
+
+
+'''
+老版本上传文件函数
 @login_required
 def ppt_upload(request,c_id):
     #show uploaded files
@@ -422,43 +480,4 @@ def handle_upload_file(f,course_id,title):
     #return path
     return file_name
 
-
-def delete_pptfile(ppt_id):
-    '''
-    从数据库和服务器中删除ppt及其对应的pptslice模型及文件，删除时直接删除课件文件夹，会导致pdf源文件也被删除
-    
-    Args:
-        ppt_id 要删除的ppt的id，可能为string数据或者int数据 
-    '''
-    # First, delete all slice model of this ppt
-    # Second, get the path of this ppt
-    # Third, delete all the file of ppt and slices
-    ppt = get_object_or_404(PPTfile,id=int(ppt_id))
-    ppt.pptslice_set.all().delete()
-    pptpath = "/media/digitalClass/ppts/%d/%s/"%(ppt.course.id,ppt.title)
-    try:
-	shutil.rmtree(pptpath)
-        if not os.path.exists(pptpath):
-	    print "{}\'s files have been deleted".format(ppt.title)
-	    ppt.delete()
-    except Exception, e:
-	print e
-
-def delete_video(video_id):
-    '''
-    从数据库和服务器中删除video对应的模型及文件
-    
-    Args:
-        video_id 要删除的video的id，可能为string数据或者int数据 
-    '''
-    # 
-    video = get_object_or_404(Video,id=int(video_id))
-    pptpath = "/media/digitalClass/video/%d/%s/"%(video.course_id,video.title)
-    try:
-	shutil.rmtree(pptpath)
-        if not os.path.exists(pptpath):
-	    print "{}\'s files have been deleted".format(video.title)
-	    video.delete()
-    except Exception, e:
-	print e
-
+'''
